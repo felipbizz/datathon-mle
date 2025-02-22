@@ -1,0 +1,18 @@
+[project]
+name = "datathon-mle"
+version = "0.1.0"
+description = "Projeto fase 5 da pós tech"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.2.3",
+    "polars>=1.22.0",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "ipywidgets>=8.1.5",
+    "nbconvert>=7.16.6",
+    "pre-commit>=4.1.0",
+]

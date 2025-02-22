@@ -1,0 +1,25 @@
+repos:
+  - repo: local
+    hooks:
+      - id: remove-notebook-output
+        name: Remove notebook output
+        description: Strips out any output or data from Jupyter Notebook cells
+        language: system
+        files: \.ipynb$
+        entry: jupyter nbconvert --clear-output --inplace
+
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff format
+        entry: uvx ruff format
+        language: system
+        types: [python]
+
+  - repo: local
+    hooks:
+      - id: hadolint-docker
+        name: Hadolint Dockerfile
+        entry: hadolint
+        language: system
+        types: [dockerfile]
