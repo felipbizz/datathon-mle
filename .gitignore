@@ -1,6 +1,11 @@
 
 
 *.csv
+*.json
+Datathon Decision/
+data/
+*.html
+_old_*
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

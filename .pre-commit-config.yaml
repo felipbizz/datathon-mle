@@ -16,7 +16,7 @@ repos:
         language: system
         types: [python]
 
-  - repo: local
+  - repo: local # Testar hadolint em: https://hadolint.github.io/hadolint/
     hooks:
       - id: hadolint-docker
         name: Hadolint Dockerfile
