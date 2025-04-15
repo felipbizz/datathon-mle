@@ -5,8 +5,9 @@ base_path = Path("../Datathon Decision/3_silver")
 arquivos = {
     "applicants": base_path / "applicants.parquet",
     "vagas": base_path / "vagas.parquet",
-    "prospects": base_path / "prospects.parquet"
+    "prospects": base_path / "prospects.parquet",
 }
+
 
 def gerar_template_dicionario(nome, df):
     md = f"## {nome}\n\n| Coluna | Tipo | Descrição | Possíveis valores |\n|--------|------|-----------|------------------|\n"
@@ -14,6 +15,7 @@ def gerar_template_dicionario(nome, df):
         tipo = str(df[col].dtype)
         md += f"| {col} | {tipo} |  |  |\n"
     return md
+
 
 if __name__ == "__main__":
     with open("data_dictionary_template.md", "w", encoding="utf-8") as f:
