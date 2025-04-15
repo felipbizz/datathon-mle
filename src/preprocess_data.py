@@ -19,7 +19,7 @@ def remove_colunas_dominantes(df: pd.DataFrame, limite_dominancia: float = 0.9) 
     return df
 
 
-def preprocess_data(
+def convert_json_to_df(
     path: str, index_col: str, cols_normalize: list = None, explode_col: str = None
 ) -> pd.DataFrame:
     df = (
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         "informacoes_profissionais",
         "formacao_e_idiomas",
     ]
-    df_applicants = preprocess_data(
+    df_applicants = convert_json_to_df(
         path=path_applicants, index_col="cod_applicant", cols_normalize=cols_applicants
     )
     df_applicants.to_parquet(
@@ -148,7 +148,7 @@ if __name__ == "__main__":
 
     # df_prospects
     path_prospects = "../Datathon Decision/prospects.json"
-    df_prospects = preprocess_data(
+    df_prospects = convert_json_to_df(
         path=path_prospects, index_col="cod_vaga", explode_col="prospects"
     )
     df_prospects.to_parquet(
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     # df_vagas
     path_vagas = "../Datathon Decision/vagas.json"
     cols_vagas = ["informacoes_basicas", "perfil_vaga", "beneficios"]
-    df_vagas = preprocess_data(
+    df_vagas = convert_json_to_df(
         path=path_vagas, index_col="cod_vaga", cols_normalize=cols_vagas
     )
     df_vagas.to_parquet("../Datathon Decision/2_bronze/vagas.parquet", index=False)
