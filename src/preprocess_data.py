@@ -1,3 +1,4 @@
+from src.log_config import logging
 import pandas as pd
 import nltk
 from nltk.corpus import stopwords
@@ -89,7 +90,7 @@ def limpar_datas(valor):
             return None
         return data
     except ValueError:
-        print(f"Erro ao converter data: {valor}")
+        logging.error(f"Erro ao converter data: {valor}")
         return None
 
 
@@ -104,7 +105,7 @@ def limpar_anos(valor):
             return ano
         return None
     except ValueError:
-        print(f"Erro ao converter ano: {valor}")
+        logging.error(f"Erro ao converter ano: {valor}")
         return None
 
 
@@ -143,7 +144,7 @@ if __name__ == "__main__":
     df_applicants.to_parquet(
         "../Datathon Decision/2_bronze/applicants.parquet", index=False
     )
-    print("df_applicants", df_applicants.shape)
+    logging.info("df_applicants %s", df_applicants.shape)
 
     # df_prospects
     path_prospects = "../Datathon Decision/prospects.json"
@@ -153,7 +154,7 @@ if __name__ == "__main__":
     df_prospects.to_parquet(
         "../Datathon Decision/2_bronze/prospects.parquet", index=False
     )
-    print("df_prospects", df_prospects.shape)
+    logging.info("df_prospects %s", df_prospects.shape)
 
     # df_vagas
     path_vagas = "../Datathon Decision/vagas.json"
@@ -162,9 +163,9 @@ if __name__ == "__main__":
         path=path_vagas, index_col="cod_vaga", cols_normalize=cols_vagas
     )
     df_vagas.to_parquet("../Datathon Decision/2_bronze/vagas.parquet", index=False)
-    print("df_vagas", df_vagas.shape)
+    logging.info("df_vagas %s", df_vagas.shape)
 
-    print("# --- TRATANDO COLUNAS TABELA APPLICANTS ---")
+    logging.info("# --- TRATANDO COLUNAS TABELA APPLICANTS ---")
 
     colunas_texto_applicants = [
         "cv_pt",
@@ -187,7 +188,7 @@ if __name__ == "__main__":
         "../Datathon Decision/3_silver/applicants.parquet", index=False
     )
 
-    print("# --- TRATANDO COLUNAS TABELA VAGAS ---  ")
+    logging.info("# --- TRATANDO COLUNAS TABELA VAGAS ---  ")
     colunas_texto_vagas = [
         "titulo_vaga",
         "tipo_contratacao",
@@ -208,11 +209,11 @@ if __name__ == "__main__":
     df_vagas = clean_data(df_vagas, colunas_texto_vagas, colunas_datas_vagas)
     df_vagas.to_parquet("../Datathon Decision/3_silver/vagas.parquet", index=False)
 
-    print("# --- TRATANDO COLUNAS TABELA PROSPECTS ---")
+    logging.info("# --- TRATANDO COLUNAS TABELA PROSPECTS ---")
 
     colunas_texto_prospects = ["titulo", "situacao_candidado", "comentario"]
     df_prospects = clean_data(df_prospects, colunas_texto_prospects)
     df_prospects.to_parquet(
         "../Datathon Decision/3_silver/prospects.parquet", index=False
     )
-    print("Data preprocessing completed.")
+    logging.info("Data preprocessing completed.")

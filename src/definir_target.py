@@ -1,3 +1,4 @@
+from src.log_config import logging
 import pandas as pd
 
 df = pd.read_parquet("../Datathon Decision/3_silver/dataset_consolidado.parquet")
@@ -50,10 +51,10 @@ df_model = df.drop(columns=[col for col in colunas_remover if col in df.columns]
 df_model.to_parquet(
     "../Datathon Decision/3_silver/dataset_modelagem.parquet", index=False
 )
-print(
+logging.info(
     "Dataset para modelagem salvo em ../Datathon Decision/3_silver/dataset_modelagem.parquet"
 )
-print("Distribuição da variável-alvo:")
-print(df["target"].value_counts())
-print("Distribuição das categorias de situação do candidato:")
-print(df["situacao_candidado"].value_counts())
+logging.info("Distribuição da variável-alvo:")
+logging.info(df["target"].value_counts())
+logging.info("Distribuição das categorias de situação do candidato:")
+logging.info(df["situacao_candidado"].value_counts())
