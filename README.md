@@ -31,14 +31,14 @@ Este projeto tem como objetivo desenvolver uma solução de Machine Learning par
 
 ## Principais Arquivos da src
 
-- **check_data_quality.py**: Verificação de integridade e qualidade dos dados.
-- **consolidar_dados.py**: Consolidação e junção dos datasets principais.
-- **definir_target.py**: Definição e transformação da variável-alvo.
-- **eda.py**: Análises exploratórias e geração de gráficos.
-- **feature_engineering.py**: Criação e transformação de features.
-- **preprocess_data.py**: Pré-processamento geral dos dados.
-- **train_model.py**: Treinamento, validação e salvamento do modelo.
 - **generate_data_dictionary.py**: Geração automática do dicionário de dados.
+- **preprocess_data.py**: Pré-processamento geral dos dados.
+- **eda.py**: Análises exploratórias e geração de gráficos.
+- **check_data_quality.py**: Verificação de integridade e qualidade dos dados.
+- **definir_target.py**: Definição e transformação da variável-alvo.
+- **consolidar_dados.py**: Consolidação e junção dos datasets principais.
+- **feature_engineering.py**: Criação e transformação de features.
+- **train_model.py**: Treinamento, validação e salvamento do modelo.
 
 ## Como Rodar o Projeto
 
