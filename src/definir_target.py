@@ -1,7 +1,9 @@
-from src.log_config import logging
+from log_config import logging
 import pandas as pd
+from config import load_config, get_abs_path
 
-df = pd.read_parquet("../Datathon Decision/3_silver/dataset_consolidado.parquet")
+config = load_config()
+paths = config["paths"]
 
 situacao_candidado_nao_aprovado = [
     "nao aprovado rh",
@@ -28,33 +30,37 @@ situacao_candidato_inicial = [
     "inscrito",
 ]
 
-df["situacao_candidado"] = df["situacao_candidado"].replace(
-    situacao_candidado_nao_aprovado, "nao_aprovado"
-)
-df["situacao_candidado"] = df["situacao_candidado"].replace(
-    situacao_candidado_aprovado, "aprovado"
-)
-df["situacao_candidado"] = df["situacao_candidado"].replace(
-    situacao_candidado_desistente, "desistente"
-)
-df["situacao_candidado"] = df["situacao_candidado"].replace(
-    situacao_candidato_inicial, "inicial"
-)
+mapping = {}
+for s in situacao_candidado_nao_aprovado:
+    mapping[s] = "nao_aprovado"
+for s in situacao_candidado_aprovado:
+    mapping[s] = "aprovado"
+for s in situacao_candidado_desistente:
+    mapping[s] = "desistente"
+for s in situacao_candidato_inicial:
+    mapping[s] = "inicial"
 
-# Definindo a target
-df["target"] = (df["situacao_candidado"] == "aprovado").astype(int)
+def define_target():
+    # Lê o dataset consolidado usando caminho absoluto
+    df = pd.read_parquet(get_abs_path(paths["dataset_consolidado"]))
+    df["situacao_candidado"] = df["situacao_candidado"].replace(mapping)
 
-# Remover colunas que não podem ser usadas como preditoras
-colunas_remover = ["situacao_candidado", "cod_applicant", "cod_vaga", "nome"]
-df_model = df.drop(columns=[col for col in colunas_remover if col in df.columns])
+    # Definindo a target
+    df["target"] = (df["situacao_candidado"] == "aprovado").astype(int)
 
-df_model.to_parquet(
-    "../Datathon Decision/3_silver/dataset_modelagem.parquet", index=False
-)
-logging.info(
-    "Dataset para modelagem salvo em ../Datathon Decision/3_silver/dataset_modelagem.parquet"
-)
-logging.info("Distribuição da variável-alvo:")
-logging.info(df["target"].value_counts())
-logging.info("Distribuição das categorias de situação do candidato:")
-logging.info(df["situacao_candidado"].value_counts())
+    # Remover colunas que não podem ser usadas como preditoras
+    colunas_remover = ['analista_responsavel', 'cidade','cliente','cod_vaga','codigo', 'data_candidatura', 'data_final', 'data_inicial','data_requicisao',
+                        'empresa_divisao','estado','limite_esperado_para_contratacao', 'local_trabalho','nome','recrutador',
+                        'regiao','requisitante', 'situacao_candidado', 'solicitante_cliente', 'ultima_atualizacao']
+    df_model = df.drop(columns=[col for col in colunas_remover if col in df.columns])
+
+    # Salva o dataset de modelagem usando caminho absoluto
+    df_model.to_parquet(get_abs_path(paths["dataset_modelagem"]), index=False)
+    logging.info(f"Dataset para modelagem salvo em {paths['dataset_modelagem']}")
+    logging.info("Distribuição da variável-alvo:")
+    logging.info(df["target"].value_counts())
+    logging.info("Distribuição das categorias de situação do candidato:")
+    logging.info(df["situacao_candidado"].value_counts())
+
+if __name__ == '__main__':
+    define_target()

@@ -1,12 +1,15 @@
-from src.log_config import logging
+from log_config import logging
 import pandas as pd
 import nltk
 from nltk.corpus import stopwords
 import re
 from unidecode import unidecode
+from config import load_config, get_abs_path
 
 nltk.download("stopwords")
 stop_words = set(stopwords.words("portuguese"))
+
+config = load_config()
 
 
 def remove_colunas_dominantes(df: pd.DataFrame, limite_dominancia: float = 0.9) -> set:
@@ -105,7 +108,7 @@ def limpar_anos(valor):
             return ano
         return None
     except ValueError:
-        logging.error(f"Erro ao converter ano: {valor}")
+        # logging.error(f"Erro ao converter ano: {valor}")
         return None
 
 
@@ -129,9 +132,10 @@ def clean_data(
     return df
 
 
-if __name__ == "__main__":
+def execute_preprocess():
+    paths = config["paths"]
     # df_applicants
-    path_applicants = "../Datathon Decision/applicants.json"
+    path_applicants = get_abs_path(paths["applicants_json"])
     cols_applicants = [
         "infos_basicas",
         "informacoes_pessoais",
@@ -141,28 +145,24 @@ if __name__ == "__main__":
     df_applicants = convert_json_to_df(
         path=path_applicants, index_col="cod_applicant", cols_normalize=cols_applicants
     )
-    df_applicants.to_parquet(
-        "../Datathon Decision/2_bronze/applicants.parquet", index=False
-    )
+    df_applicants.to_parquet(get_abs_path(paths["applicants_bronze"]), index=False)
     logging.info("df_applicants %s", df_applicants.shape)
 
     # df_prospects
-    path_prospects = "../Datathon Decision/prospects.json"
+    path_prospects = get_abs_path(paths["prospects_json"])
     df_prospects = convert_json_to_df(
         path=path_prospects, index_col="cod_vaga", explode_col="prospects"
     )
-    df_prospects.to_parquet(
-        "../Datathon Decision/2_bronze/prospects.parquet", index=False
-    )
+    df_prospects.to_parquet(get_abs_path(paths["prospects_bronze"]), index=False)
     logging.info("df_prospects %s", df_prospects.shape)
 
     # df_vagas
-    path_vagas = "../Datathon Decision/vagas.json"
+    path_vagas = get_abs_path(paths["vagas_json"])
     cols_vagas = ["informacoes_basicas", "perfil_vaga", "beneficios"]
     df_vagas = convert_json_to_df(
         path=path_vagas, index_col="cod_vaga", cols_normalize=cols_vagas
     )
-    df_vagas.to_parquet("../Datathon Decision/2_bronze/vagas.parquet", index=False)
+    df_vagas.to_parquet(get_abs_path(paths["vagas_bronze"]), index=False)
     logging.info("df_vagas %s", df_vagas.shape)
 
     logging.info("# --- TRATANDO COLUNAS TABELA APPLICANTS ---")
@@ -184,9 +184,7 @@ if __name__ == "__main__":
         ["ano_conclusao"],
         ["remuneracao"],
     )
-    df_applicants.to_parquet(
-        "../Datathon Decision/3_silver/applicants.parquet", index=False
-    )
+    df_applicants.to_parquet(get_abs_path(paths["applicants_silver"]), index=False)
 
     logging.info("# --- TRATANDO COLUNAS TABELA VAGAS ---  ")
     colunas_texto_vagas = [
@@ -207,13 +205,15 @@ if __name__ == "__main__":
     ]
 
     df_vagas = clean_data(df_vagas, colunas_texto_vagas, colunas_datas_vagas)
-    df_vagas.to_parquet("../Datathon Decision/3_silver/vagas.parquet", index=False)
+    df_vagas.to_parquet(get_abs_path(paths["vagas_silver"]), index=False)
 
     logging.info("# --- TRATANDO COLUNAS TABELA PROSPECTS ---")
 
     colunas_texto_prospects = ["titulo", "situacao_candidado", "comentario"]
     df_prospects = clean_data(df_prospects, colunas_texto_prospects)
-    df_prospects.to_parquet(
-        "../Datathon Decision/3_silver/prospects.parquet", index=False
-    )
+    df_prospects.to_parquet(get_abs_path(paths["prospects_silver"]), index=False)
     logging.info("Data preprocessing completed.")
+
+
+if __name__ == "__main__":
+    execute_preprocess()
