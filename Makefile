@@ -1,9 +1,12 @@
 all: help ## Abre a documentação mostrando os comandos disponíveis
 
-train: ## Roda arquivo main DINO e salva logs
+pipeline: ## Roda pipeline completo
+	python main.py
+
+train: ## Roda etapa de treinamento
 	python main.py --steps train_model
 
-preprocess: ## Encerra processo do Dino
+preprocess: ## Roda apenas preprocessamento
 	python main.py --steps preprocess
 
 help: ## Mostra os comandos. Você precisa sempre comentar o que a função faz, se não ela não será exibida nesse help
