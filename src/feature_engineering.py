@@ -145,12 +145,9 @@ class TextFeatureGenerator:
 def main() -> None:
     config = load_config()
     paths = config["paths"]
-    fe_cfg = config["feature_engineering"]
     for k in paths:
         paths[k] = get_abs_path(paths[k])
     stop_words = set(stopwords.words("portuguese"))
-    palavras_chave = fe_cfg["palavras_chave"]
-    n_clusters = fe_cfg["n_clusters"]
 
     df = pd.read_parquet(paths["dataset_modelagem"])
 

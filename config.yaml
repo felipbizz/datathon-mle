@@ -1,0 +1,28 @@
+# Central config for datathon-mle pipeline
+# Adjust paths and parameters as needed
+
+# Data paths
+paths:
+  applicants_json: "Datathon Decision/1_raw/applicants.json"
+  prospects_json: "Datathon Decision/1_raw/prospects.json"
+  vagas_json: "Datathon Decision/1_raw/vagas.json"
+  applicants_bronze: "Datathon Decision/2_bronze/applicants.parquet"
+  prospects_bronze: "Datathon Decision/2_bronze/prospects.parquet"
+  vagas_bronze: "Datathon Decision/2_bronze/vagas.parquet"
+  applicants_silver: "Datathon Decision/3_silver/applicants.parquet"
+  prospects_silver: "Datathon Decision/3_silver/prospects.parquet"
+  vagas_silver: "Datathon Decision/3_silver/vagas.parquet"
+  dataset_consolidado: "Datathon Decision/4_gold/dataset_consolidado.parquet"
+  dataset_modelagem: "Datathon Decision/4_gold/dataset_modelagem.parquet"
+  dataset_features: "Datathon Decision/4_gold/dataset_features.parquet"
+  modelo_treinado: "Datathon Decision/4_gold/modelo_treinado.pkl"
+  feature_importance_rf: "Datathon Decision/4_gold/feature_importance_rf.csv"
+  feature_importance_lr: "Datathon Decision/4_gold/feature_importance_lr.csv"
+
+# Model parameters
+model:
+  random_state: 42
+  rf_n_estimators: 100
+  lr_max_iter: 1000
+  test_size: 0.2
+
