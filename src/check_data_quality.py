@@ -1,4 +1,4 @@
-from src.log_config import logging
+from log_config import logging
 import pandas as pd
 
 input_path = "../Datathon Decision/3_silver/dataset_modelagem.parquet"

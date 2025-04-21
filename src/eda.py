@@ -1,4 +1,4 @@
-from src.log_config import logging
+from log_config import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
