@@ -52,10 +52,7 @@ Este projeto tem como objetivo desenvolver uma solução de Machine Learning par
    ```
 
 3. **Execução dos Scripts**
-   - Para treinar o modelo:
-     ```bash
-     python src/train_model.py
-     ```
+   - Para rodar os scripts utilize o comando `make` na raiz do projeto, ele retornará a documentação com os comandos disponíveis, ou visualize no arquivo `Makefile`
 
 ## Documentação
 
