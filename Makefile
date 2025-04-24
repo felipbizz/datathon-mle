@@ -1,4 +1,28 @@
+# Define variables
+INFRA_DIR=infra
+SCRIPTS_DIR=scripts
+
 all: help ## Abre a documentação mostrando os comandos disponíveis
+
+create-infra: ## Cria os containers de infraestrutura
+	@echo "Creating Docker containers..."
+	cd $(INFRA_DIR) && docker compose up -d
+
+destroy-infra: ## Remove os containers de infraestrutura
+	@echo "Destroying Docker containers..."
+	cd $(INFRA_DIR) && docker compose down
+
+start-infra: ## Inicializa os containers de infraestrutura sem criar novos
+	@echo "Starting Docker containers..."
+	cd $(INFRA_DIR) && docker compose start
+
+stop-infra: ## Para os containers de infraestrutura sem removê-los
+	@echo "Stopping Docker containers..."
+	cd $(INFRA_DIR) && docker compose stop
+
+initialize-data: ## Baixa os arquivos de dados
+	@echo "Downloading data files..."
+	$(SCRIPTS_DIR)/initialize_data.sh
 
 pipeline: ## Roda pipeline completo
 	python main.py
