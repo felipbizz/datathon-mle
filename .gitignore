@@ -10,6 +10,7 @@ infra/volumes/mlflow/
 
 infra/volumes/grafana/log/
 infra/volumes/grafana/var
+mlruns/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
