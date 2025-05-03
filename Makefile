@@ -55,6 +55,11 @@ serve_model: ## Roda o modelo em um container docker
 	@echo "Iniciando o modelo em um container Docker..."
 	@lc_model=$(shell echo $(model) | tr '[:upper:]' '[:lower:]'); \
 	docker run -dit -p 8080:8080 --name $$lc_model-$(version) $${lc_model}:$(version) 
+
+set_tracking_uri: ## Define a URI de rastreamento do MLflow
+	@echo "Definindo URI de rastreamento do MLflow..."
+	export MLFLOW_TRACKING_URI=http://localhost:5000
+	
 pipeline: ## Roda pipeline completo
 	python main.py
 

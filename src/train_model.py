@@ -20,6 +20,7 @@ from mlflow.models import infer_signature
 from datetime import datetime
 import pandas as pd
 import mlflow
+import mlflow.sklearn
 import platform
 import psutil
 import pickle
@@ -92,14 +93,7 @@ def main() -> None:
             model.fit(X_train_scaled, y_train)
             y_pred = model.predict(X_test_scaled)
             signature = infer_signature(X_test_scaled, y_pred)
-            mlflow.sklearn.log_model(
-                model,
-                artifact_path=name,
-                # model_name=name,
-                # registered_model_name=name,
-                signature=signature,
-                # input_example=X_test_scaled[:5],
-            )
+            mlflow.sklearn.log_model(sk_model=model,artifact_path=name,signature=signature)
             mlflow.log_param("model_type", name)
             mlflow.log_params(model.get_params())
             mlflow.log_metric("test_size", model_cfg["test_size"])
@@ -135,8 +129,8 @@ def main() -> None:
             print(classification_report(y_test, y_pred))
             
             # # Adicionando um sleep para  garantir coleta de métricas
-            # print("Aguardando 25 segundos para garantir coleta de métricas...")
-            # time.sleep(25)
+            # print("Aguardando 15 segundos para garantir coleta de métricas...")
+            # time.sleep(15)
 
 
     best_model_name = max(results, key=lambda k: results[k]["auc"])
