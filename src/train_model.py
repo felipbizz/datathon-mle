@@ -81,14 +81,14 @@ def main() -> None:
         with mlflow.start_run(run_name=run_name) as run:
             model.fit(X_train_scaled, y_train)
             y_pred = model.predict(X_test_scaled)
-            signature = infer_signature(X_test_scaled, y_pred)
-            mlflow.sklearn.log_model(
-                model,
-                artifact_path=name,
-                registered_model_name=name,
-                signature=signature,
-                # input_example=X_test_scaled[:5],
-            )
+            # signature = infer_signature(X_test_scaled, y_pred)
+            # mlflow.sklearn.log_model(
+            #     model,
+            #     artifact_path=name,
+            #     registered_model_name=name,
+            #     signature=signature,
+            #     # input_example=X_test_scaled[:5],
+            # )
             mlflow.log_param("model_type", name)
             mlflow.log_params(model.get_params())
             mlflow.log_metric("test_size", model_cfg["test_size"])
@@ -115,6 +115,8 @@ def main() -> None:
             prec = precision_score(y_test, y_pred)
             rec = recall_score(y_test, y_pred)
             results[name] = {"auc": auc, "f1": f1, "precision": prec, "recall": rec}
+            results[name].update({ "run_id": run.info.run_id })
+            print(f"\nRun ID: {run.info.run_id}")
             print(f"\nModelo: {name}")
             print(
                 f"AUC: {auc:.3f} | F1: {f1:.3f} | Precision: {prec:.3f} | Recall: {rec:.3f}"
@@ -122,7 +124,12 @@ def main() -> None:
             print(classification_report(y_test, y_pred))
 
     best_model_name = max(results, key=lambda k: results[k]["auc"])
+    best_run_id = results[best_model_name]["run_id"]
     best_model = models[best_model_name]
+
+    result = mlflow.register_model(f"runs:/{best_run_id}/sklearn-model", f"{best_model_name}")
+    print(f"Modelo registrado: {result.name} (AUC={results[best_model_name]['auc']:.3f})")
+
     with open(paths["modelo_treinado"], "wb") as f:
         pickle.dump(
             {

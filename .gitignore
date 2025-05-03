@@ -8,7 +8,8 @@ _old_*
 # MLFlow Runs
 infra/volumes/mlflow/
 
-infra/volumes/grafana/*
+infra/volumes/grafana/log/
+infra/volumes/grafana/var
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
