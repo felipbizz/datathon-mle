@@ -18,6 +18,12 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 import pickle
 from config import load_config, get_abs_path
+import mlflow
+import mlflow.sklearn
+from mlflow.models import infer_signature
+from datetime import datetime
+
+
 
 
 def main() -> None:
@@ -70,23 +76,50 @@ def main() -> None:
     }
     results = {}
     for name, model in models.items():
-        model.fit(X_train_scaled, y_train)
-        y_pred = model.predict(X_test_scaled)
-        y_proba = (
-            model.predict_proba(X_test_scaled)[:, 1]
-            if hasattr(model, "predict_proba")
-            else y_pred
-        )
-        auc = roc_auc_score(y_test, y_proba)
-        f1 = f1_score(y_test, y_pred)
-        prec = precision_score(y_test, y_pred)
-        rec = recall_score(y_test, y_pred)
-        results[name] = {"auc": auc, "f1": f1, "precision": prec, "recall": rec}
-        print(f"\nModelo: {name}")
-        print(
-            f"AUC: {auc:.3f} | F1: {f1:.3f} | Precision: {prec:.3f} | Recall: {rec:.3f}"
-        )
-        print(classification_report(y_test, y_pred))
+        current_datetime = datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+        run_name = f'train_model_{name}_{current_datetime}'
+        with mlflow.start_run(run_name=run_name) as run:
+            model.fit(X_train_scaled, y_train)
+            y_pred = model.predict(X_test_scaled)
+            signature = infer_signature(X_test_scaled, y_pred)
+            mlflow.sklearn.log_model(
+                model,
+                artifact_path=name,
+                registered_model_name=name,
+                signature=signature,
+                # input_example=X_test_scaled[:5],
+            )
+            mlflow.log_param("model_type", name)
+            mlflow.log_params(model.get_params())
+            mlflow.log_metric("test_size", model_cfg["test_size"])
+            mlflow.log_metric("random_state", model_cfg["random_state"])
+            mlflow.log_metric("rf_n_estimators", model_cfg["rf_n_estimators"])
+            mlflow.log_metric("lr_max_iter", model_cfg["lr_max_iter"])
+            mlflow.log_metric("auc", roc_auc_score(y_test, y_pred))
+            mlflow.log_metric("f1", f1_score(y_test, y_pred))
+            mlflow.log_metric("precision", precision_score(y_test, y_pred))
+            mlflow.log_metric("recall", recall_score(y_test, y_pred))
+            mlflow.log_artifact(paths["dataset_features"])
+            mlflow.log_artifact(paths["feature_importance_rf"])
+            mlflow.log_artifact(paths["feature_importance_lr"])
+            mlflow.log_artifact(paths["modelo_treinado"])
+            mlflow.log_artifact(paths["feature_importance_rf"])
+            mlflow.log_artifact(paths["feature_importance_lr"])
+            y_proba = (
+                model.predict_proba(X_test_scaled)[:, 1]
+                if hasattr(model, "predict_proba")
+                else y_pred
+            )
+            auc = roc_auc_score(y_test, y_proba)
+            f1 = f1_score(y_test, y_pred)
+            prec = precision_score(y_test, y_pred)
+            rec = recall_score(y_test, y_pred)
+            results[name] = {"auc": auc, "f1": f1, "precision": prec, "recall": rec}
+            print(f"\nModelo: {name}")
+            print(
+                f"AUC: {auc:.3f} | F1: {f1:.3f} | Precision: {prec:.3f} | Recall: {rec:.3f}"
+            )
+            print(classification_report(y_test, y_pred))
 
     best_model_name = max(results, key=lambda k: results[k]["auc"])
     best_model = models[best_model_name]

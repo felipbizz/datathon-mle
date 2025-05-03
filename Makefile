@@ -1,7 +1,4 @@
-# Definindo o shell como bash
-SHELL=/usr/bin/bash
-
-# Definindo variáveis
+# Define variables
 INFRA_DIR=infra
 SCRIPTS_DIR=scripts
 
@@ -22,15 +19,21 @@ start-infra: ## Inicializa os containers de infraestrutura sem criar novos
 stop-infra: ## Para os containers de infraestrutura sem removê-los
 	@echo "Stopping Docker containers..."
 	cd $(INFRA_DIR) && docker compose stop
-	
-restart-infra: ## Reinicia os containers de infraestrutura
-	@echo "Restarting Docker containers..."
-	cd $(INFRA_DIR) && docker compose restart
-	
+
 initialize-data: ## Baixa os arquivos de dados
 	@echo "Downloading data files..."
-	mkdir -p Datathon\ Decision/{1_raw,2_bronze,3_silver,4_gold}
 	$(SCRIPTS_DIR)/initialize_data.sh
+
+purge_experiments: ## Limpa o banco de dados
+	@echo "Clearing database..."
+	sudo chmod -R 777 $(INFRA_DIR)/volumes/mlflow/sqlite
+	python src/db_mgmt.py --action purge_experiments
+	@echo "Database cleared."
+
+list-experiments: ## Lista os experimentos do MLflow
+	@echo "Listing MLflow experiments..."
+	python src/db_mgmt.py --action list_experiments
+	@echo "Experiments listed."
 
 pipeline: ## Roda pipeline completo
 	python main.py

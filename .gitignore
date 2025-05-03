@@ -1,11 +1,14 @@
-
-
 *.csv
 *.json
 Datathon Decision/
 data/
 *.html
 _old_*
+
+# MLFlow Runs
+infra/volumes/mlflow/
+
+infra/volumes/grafana/*
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
