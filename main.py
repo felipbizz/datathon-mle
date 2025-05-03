@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 from src.log_config import logging
+import mlflow
 
 
 def preprocess():
@@ -28,7 +29,18 @@ def train_model():
     subprocess.run(["python", "src/train_model.py"], check=True)
     logging.info('Finalizou train_model')
 
+
 def main(steps):
+
+    # Set up MLflow tracking URI
+    mlflow.set_tracking_uri("http://127.0.0.1:5000")
+
+
+    # Set up MLflow experiment
+    mlflow.set_experiment(f"experiment_{steps[0]}") #_{current_datetime}")
+    # Enable system metrics logging
+    mlflow.enable_system_metrics_logging()
+
     if "preprocess" in steps:
         preprocess()
     if "consolidate" in steps:
