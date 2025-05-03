@@ -19,8 +19,6 @@ from sklearn.preprocessing import StandardScaler
 import pickle
 from config import load_config, get_abs_path
 import mlflow
-import mlflow.sklearn
-from mlflow.models import infer_signature
 from datetime import datetime
 
 
@@ -127,7 +125,7 @@ def main() -> None:
     best_run_id = results[best_model_name]["run_id"]
     best_model = models[best_model_name]
 
-    result = mlflow.register_model(f"runs:/{best_run_id}/sklearn-model", f"{best_model_name}")
+    result = mlflow.register_model(f"runs:/{best_run_id}/{best_model_name}", f"{best_model_name}")
     print(f"Modelo registrado: {result.name} (AUC={results[best_model_name]['auc']:.3f})")
 
     with open(paths["modelo_treinado"], "wb") as f:

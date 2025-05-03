@@ -30,10 +30,20 @@ purge_experiments: ## Limpa o banco de dados
 	python src/db_mgmt.py --action purge_experiments
 	@echo "Database cleared."
 
-list-experiments: ## Lista os experimentos do MLflow
+list_experiments: ## Lista os experimentos do MLflow
 	@echo "Listing MLflow experiments..."
 	python src/db_mgmt.py --action list_experiments
 	@echo "Experiments listed."
+
+purge_registered_models: ## Limpa o registro de modelos
+	@echo "Removendo modelos registrados..."
+	python src/model_mgmt.py --action purge_registered_models
+	@echo "Todos os modelos removidos."
+
+list_registered_modelss: ## Lista os modelos registrados
+	@echo "Listando modelos registrados..."
+	python src/model_mgmt.py --action list_registered_models
+	@echo "Modelos listados"
 
 pipeline: ## Roda pipeline completo
 	python main.py
