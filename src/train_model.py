@@ -3,7 +3,6 @@ Train and evaluate classification models for the datathon pipeline.
 Loads all paths and parameters from config.yaml for reproducibility.
 """
 
-import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -16,13 +15,25 @@ from sklearn.metrics import (
 )
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
-import pickle
 from config import load_config, get_abs_path
-import mlflow
+from mlflow.models import infer_signature
 from datetime import datetime
+import pandas as pd
+import mlflow
+import platform
+import psutil
+import pickle
+import time
 
 
-
+def log_system_info():
+    mlflow.log_param("system", platform.system())
+    mlflow.log_param("release", platform.release())
+    mlflow.log_param("version", platform.version())
+    mlflow.log_param("machine", platform.machine())
+    mlflow.log_param("processor", platform.processor())
+    mlflow.log_param("cpu_count", psutil.cpu_count())
+    mlflow.log_param("memory", psutil.virtual_memory().total / (1024**3))
 
 def main() -> None:
     config = load_config()
@@ -77,16 +88,18 @@ def main() -> None:
         current_datetime = datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
         run_name = f'train_model_{name}_{current_datetime}'
         with mlflow.start_run(run_name=run_name) as run:
+            log_system_info()
             model.fit(X_train_scaled, y_train)
             y_pred = model.predict(X_test_scaled)
-            # signature = infer_signature(X_test_scaled, y_pred)
-            # mlflow.sklearn.log_model(
-            #     model,
-            #     artifact_path=name,
-            #     registered_model_name=name,
-            #     signature=signature,
-            #     # input_example=X_test_scaled[:5],
-            # )
+            signature = infer_signature(X_test_scaled, y_pred)
+            mlflow.sklearn.log_model(
+                model,
+                artifact_path=name,
+                # model_name=name,
+                # registered_model_name=name,
+                signature=signature,
+                # input_example=X_test_scaled[:5],
+            )
             mlflow.log_param("model_type", name)
             mlflow.log_params(model.get_params())
             mlflow.log_metric("test_size", model_cfg["test_size"])
@@ -120,13 +133,18 @@ def main() -> None:
                 f"AUC: {auc:.3f} | F1: {f1:.3f} | Precision: {prec:.3f} | Recall: {rec:.3f}"
             )
             print(classification_report(y_test, y_pred))
+            
+            # # Adicionando um sleep para  garantir coleta de métricas
+            # print("Aguardando 25 segundos para garantir coleta de métricas...")
+            # time.sleep(25)
+
 
     best_model_name = max(results, key=lambda k: results[k]["auc"])
     best_run_id = results[best_model_name]["run_id"]
     best_model = models[best_model_name]
 
     result = mlflow.register_model(f"runs:/{best_run_id}/{best_model_name}", f"{best_model_name}")
-    print(f"Modelo registrado: {result.name} (AUC={results[best_model_name]['auc']:.3f})")
+    print(f"Modelo registrado: {result.name} (AUC={results[best_model_name]['auc']:.3f}, RunID: {best_run_id})")
 
     with open(paths["modelo_treinado"], "wb") as f:
         pickle.dump(

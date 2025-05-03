@@ -40,11 +40,21 @@ purge_registered_models: ## Limpa o registro de modelos
 	python src/model_mgmt.py --action purge_registered_models
 	@echo "Todos os modelos removidos."
 
-list_registered_modelss: ## Lista os modelos registrados
+list_registered_models: ## Lista os modelos registrados
 	@echo "Listando modelos registrados..."
 	python src/model_mgmt.py --action list_registered_models
 	@echo "Modelos listados"
 
+build_docker_image: ## Cria a imagem docker
+	@echo "Criando imagem Docker para $(model)..."
+	@lc_model=$(shell echo $(model) | tr '[:upper:]' '[:lower:]'); \
+	mlflow models build-docker --model-uri "models:/$(model)/$(version)" --name "$$lc_model:$(version)" 
+	@echo "Docker image built."
+
+serve_model: ## Roda o modelo em um container docker
+	@echo "Iniciando o modelo em um container Docker..."
+	@lc_model=$(shell echo $(model) | tr '[:upper:]' '[:lower:]'); \
+	docker run -dit -p 8080:8080 --name $$lc_model-$(version) $${lc_model}:$(version) 
 pipeline: ## Roda pipeline completo
 	python main.py
 
