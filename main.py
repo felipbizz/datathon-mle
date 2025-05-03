@@ -1,34 +1,47 @@
 import argparse
 import subprocess
+import mlflow
 from src.log_config import logging
+from datetime import datetime
 
 
+@mlflow.trace
 def preprocess():
     logging.info('Iniciando preprocess')
     subprocess.run(["python", "src/preprocess_data.py"], check=True)
     logging.info('Finalizou preprocess')
 
+@mlflow.trace
 def consolidate():
     logging.info('Iniciando consolidar_dados')
     subprocess.run(["python", "src/consolidar_dados.py"], check=True)
     logging.info('Finalizou consolidar_dados')
 
+@mlflow.trace
 def define_target():
     logging.info('Iniciando definir_target')
     subprocess.run(["python", "src/definir_target.py"], check=True)
     logging.info('Finalizou definir_target')
 
+@mlflow.trace
 def feature_engineering():
     logging.info('Iniciando feature_engineering')
     subprocess.run(["python", "src/feature_engineering.py"], check=True)
     logging.info('Finalizou feature_engineering')
 
+@mlflow.trace
 def train_model():
     logging.info('Iniciando train_model')
     subprocess.run(["python", "src/train_model.py"], check=True)
     logging.info('Finalizou train_model')
 
 def main(steps):
+
+    # Set up MLflow tracking URI
+    mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    mlflow.set_experiment(f"experiment_{steps[0]}") #_{current_datetime}")
+
     if "preprocess" in steps:
         preprocess()
     if "consolidate" in steps:

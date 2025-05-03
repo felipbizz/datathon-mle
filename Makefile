@@ -1,4 +1,7 @@
-# Define variables
+# Definindo o shell como bash
+SHELL=/usr/bin/bash
+
+# Definindo variáveis
 INFRA_DIR=infra
 SCRIPTS_DIR=scripts
 
@@ -19,9 +22,14 @@ start-infra: ## Inicializa os containers de infraestrutura sem criar novos
 stop-infra: ## Para os containers de infraestrutura sem removê-los
 	@echo "Stopping Docker containers..."
 	cd $(INFRA_DIR) && docker compose stop
-
+	
+restart-infra: ## Reinicia os containers de infraestrutura
+	@echo "Restarting Docker containers..."
+	cd $(INFRA_DIR) && docker compose restart
+	
 initialize-data: ## Baixa os arquivos de dados
 	@echo "Downloading data files..."
+	mkdir -p Datathon\ Decision/{1_raw,2_bronze,3_silver,4_gold}
 	$(SCRIPTS_DIR)/initialize_data.sh
 
 pipeline: ## Roda pipeline completo

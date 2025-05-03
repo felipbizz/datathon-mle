@@ -51,16 +51,17 @@ services:
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
     container_name: mlflow
-    user: "0"
+    user: "1000"
     ports:
       - "5000:5000"
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
     volumes:
-      - ./volumes/mlflow/mlruns:/mlartifacts/experiments
+      - ./volumes/mlflow/root:/mlflow
       - ./volumes/mlflow/sqlite:/sqlite
-      
-    command: "mlflow server --backend-store-uri sqlite:///sqlite/mlflow.db --default-artifact-root http://localhost:5000/api/2.0/mlflow-artifacts/artifacts/experiments --host 0.0.0.0"  
+    command: "mlflow server --backend-store-uri sqlite:///sqlite/mlflow.db --default-artifact-root /mlflow/mlruns --host 0.0.0.0"
+
+  
   
   # front:
   #   build:
