@@ -5,6 +5,7 @@ description = "Projeto fase 5 da pós tech"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "bentoml>=1.4.12",
     "deep-translator>=1.11.4",
     "hf-xet>=1.0.3",
     "lime>=0.2.0.1",

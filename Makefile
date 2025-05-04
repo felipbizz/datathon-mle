@@ -59,7 +59,17 @@ serve_model: ## Roda o modelo em um container docker
 set_tracking_uri: ## Define a URI de rastreamento do MLflow
 	@echo "Definindo URI de rastreamento do MLflow..."
 	export MLFLOW_TRACKING_URI=http://localhost:5000
-	
+
+build-bentoml: ## Cria o bentoml
+	@echo "Criando bentoml..."
+	cd /src
+	bentoml build 
+
+serve-bentoml: ## Cria o bentoml
+	@echo "Criando bentoml..."
+	cd /src
+	bentoml serve . --reload 
+
 pipeline: ## Roda pipeline completo
 	python main.py
 
