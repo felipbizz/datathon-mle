@@ -1,7 +1,7 @@
 import pickle
 import bentoml
 import os
-from config import load_config, get_abs_path
+from config import load_config
 
 config = load_config()
 paths = config["paths"]

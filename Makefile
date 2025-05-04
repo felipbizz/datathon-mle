@@ -62,13 +62,11 @@ set_tracking_uri: ## Define a URI de rastreamento do MLflow
 
 build-bentoml: ## Cria o bentoml
 	@echo "Criando bentoml..."
-	cd /src
-	bentoml build 
+	cd src && bentoml build 
 
 serve-bentoml: ## Cria o bentoml
 	@echo "Criando bentoml..."
-	cd /src
-	bentoml serve . --reload 
+	cd src && bentoml serve . --reload 
 
 pipeline: ## Roda pipeline completo
 	python main.py
