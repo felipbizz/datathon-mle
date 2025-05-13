@@ -71,8 +71,11 @@ serve-bentoml: ## Cria o bentoml
 pipeline: ## Roda pipeline completo
 	python main.py
 
-train: ## Roda etapa de treinamento
+train:  ## Roda etapa de treinamento
 	python main.py --steps train_model
+
+tune: ## Roda etapa de ajuste de hiperparâmetros
+	python main.py --steps tune_model
 
 preprocess: ## Roda apenas preprocessamento
 	python main.py --steps preprocess
