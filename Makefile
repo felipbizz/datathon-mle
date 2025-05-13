@@ -80,6 +80,24 @@ tune: ## Roda etapa de ajuste de hiperparâmetros
 preprocess: ## Roda apenas preprocessamento
 	python main.py --steps preprocess
 
+test: ## Run all tests with coverage report
+	pytest --cov=src --cov-report=term-missing tests/
+
+test-feature-engineering: ## Run feature engineering tests
+	pytest tests/test_feature_engineering.py -v
+
+test-preprocess: ## Run preprocessing tests
+	pytest tests/test_preprocess_data.py -v
+
+test-target: ## Run target definition tests
+	pytest tests/test_definir_target.py -v
+
+test-consolidate: ## Run data consolidation tests
+	pytest tests/test_consolidar_dados.py -v
+
+test-training: ## Run model training tests
+	pytest tests/test_train_model.py -v
+
 help: ## Mostra os comandos. Você precisa sempre comentar o que a função faz, se não ela não será exibida nesse help
 	@echo "\nEscolha um comando. As opções são:\n"
 	@grep -E '^[0-9a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "};\

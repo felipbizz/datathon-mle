@@ -36,16 +36,16 @@ def coluna_valida(df: pd.DataFrame, col: str) -> bool:
     return True
 
 
-def tamanho_texto(texto: Any) -> int:
-    if pd.isnull(texto):
+def tamanho_texto(texto):
+    if not isinstance(texto, str):
         return 0
-    return len(str(texto))
+    return len(texto) if texto else 0
 
 
-def n_palavras(texto: Any) -> int:
-    if pd.isnull(texto):
+def n_palavras(texto):
+    if not isinstance(texto, str):
         return 0
-    return len(str(texto).split())
+    return len(texto.split()) if texto else 0
 
 
 def conta_palavras_chave(texto: Any, palavras) -> int:
@@ -55,10 +55,12 @@ def conta_palavras_chave(texto: Any, palavras) -> int:
     return sum(1 for p in palavras if p in texto)
 
 
-def conta_cursos(texto: Any) -> int:
-    if pd.isnull(texto):
+def conta_cursos(texto):
+    if not isinstance(texto, str):
         return 0
-    return len([c for c in re.split(r"[;,\n]", str(texto)) if c.strip()])
+    # Look for exact word 'curso' with word boundaries
+    palavras = texto.lower().split()
+    return sum(1 for palavra in palavras if palavra == 'curso')
 
 class TextFeatureGenerator:
     def __init__(self):

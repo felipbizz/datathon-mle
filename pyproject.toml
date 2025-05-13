@@ -18,6 +18,8 @@ dependencies = [
     "pandera>=0.23.1",
     "polars>=1.22.0",
     "pyarrow>=19.0.1",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1",
     "python-dotenv>=1.1.0",
     "rapidfuzz>=3.13.0",
     "scikit-learn>=1.6.1",
@@ -41,4 +43,16 @@ dev = [
     "ipywidgets>=8.1.5",
     "nbconvert>=7.16.6",
     "pre-commit>=4.1.0",
+]
+
+test = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=src"
+testpaths = [
+    "tests",
 ]
