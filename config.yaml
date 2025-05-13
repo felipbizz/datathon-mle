@@ -17,12 +17,18 @@ paths:
   dataset_features: "Datathon Decision/4_gold/dataset_features.parquet"
   modelo_treinado: "Datathon Decision/4_gold/modelo_treinado.pkl"
   feature_importance_rf: "Datathon Decision/4_gold/feature_importance_rf.csv"
+  feature_importance_xgb: "Datathon Decision/4_gold/feature_importance_xgb.csv"
+  feature_importance_lgm: "Datathon Decision/4_gold/feature_importance_lgb.csv"
   feature_importance_lr: "Datathon Decision/4_gold/feature_importance_lr.csv"
 
 # Model parameters
 model:
-  random_state: 42
-  rf_n_estimators: 100
-  lr_max_iter: 1000
   test_size: 0.2
-
+  random_state: 42
+  lr_max_iter: 1000  # Add this line - controls max iterations for LogisticRegression
+  learning_rate: 0.1
+  max_depth: 5
+  subsample: 0.8
+  colsample_bytree: 0.8
+  n_estimators: 100
+  

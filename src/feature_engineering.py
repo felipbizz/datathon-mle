@@ -124,19 +124,23 @@ class TextFeatureGenerator:
             return 0
         return fuzz.token_sort_ratio(str(t1), str(t2)) / 100
 
-
-    def adicionar_similaridade_titulo_vaga(self, df: pd.DataFrame, col1="titulo", col2="titulo_vaga") -> pd.DataFrame:
+    def adicionar_similaridade_titulo_vaga(self, df: pd.DataFrame, col1="titulo", col2="titulo_vaga", batch_size=1000) -> pd.DataFrame:
         if col1 in df.columns and col2 in df.columns:
+            # String similarity calculation remains the same
             tqdm.pandas(desc="[String Similarity]")
             df["titulo_sim_ratio"] = df.progress_apply(lambda row: self.similaridade_string(row[col1], row[col2]), axis=1)
 
-            # Similaridade semântica com embeddings
             tqdm.write("[Embeddings] Gerando embeddings dos títulos...")
-            emb1 = self.gerar_embeddings(df[col1].fillna("").astype(str))
-            emb2 = self.gerar_embeddings(df[col2].fillna("").astype(str))
-
-            tqdm.write("[Embeddings] Calculando similaridade de cosseno...")
-            similarities = util.cos_sim(emb1, emb2).diagonal().cpu().numpy()
+            similarities = []
+            
+            for i in tqdm(range(0, len(df), batch_size), desc="Processing batches"):
+                batch_df = df.iloc[i:i+batch_size]
+                emb1 = self.gerar_embeddings(batch_df[col1].fillna("").astype(str))
+                emb2 = self.gerar_embeddings(batch_df[col2].fillna("").astype(str))
+                
+                batch_similarities = util.cos_sim(emb1, emb2).diagonal().cpu().numpy()
+                similarities.extend(batch_similarities)
+                
             df["sim_titulo_vs_vaga"] = similarities
 
         return df
