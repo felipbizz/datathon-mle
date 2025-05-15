@@ -5,6 +5,7 @@ from nltk.corpus import stopwords
 import re
 from unidecode import unidecode
 from config import load_config, get_abs_path
+import numpy as np
 
 nltk.download("stopwords")
 stop_words = set(stopwords.words("portuguese"))
@@ -80,43 +81,74 @@ def limpar_numeros_strings(valor):
     return valor
 
 
+def limpar_numeros(valor):
+    if pd.isna(valor):
+        return np.nan
+    try:
+        if isinstance(valor, (int, float)):
+            return float(valor)
+        if isinstance(valor, str):
+            valor = valor.strip()
+            # Case 1: US format (1,234.56)
+            if ',' in valor and '.' in valor:
+                if valor.find(',') < valor.find('.'):
+                    return float(valor.replace(',', ''))
+            # Case 2: Brazilian format (2.000,00)
+            if '.' in valor and ',' in valor:
+                if valor.find('.') < valor.find(','):
+                    cleaned = valor.replace('.', '').replace(',', '.')
+                    return float(cleaned)
+            # Case 3: Simple comma as decimal
+            if ',' in valor and '.' not in valor:
+                return float(valor.replace(',', '.'))
+            # Case 4: Plain number
+            return float(valor)
+        return np.nan
+    except (ValueError, TypeError):
+        return np.nan
+
+
 def limpar_datas(valor):
+    if pd.isna(valor):
+        return None
     if isinstance(valor, str):
         valor = valor.strip()
         if valor in ("0000-00-00", "0000", "0"):
             return None
     try:
-        data = pd.to_datetime(valor, errors="coerce", format="mixed")
-        if data is pd.NaT:
+        data = pd.to_datetime(valor, errors="coerce")
+        if pd.isna(data):
             return None
         if data.year < 1930 or data.year > 2030:
             return None
         return data
-    except ValueError:
-        logging.error(f"Erro ao converter data: {valor}")
+    except:
         return None
 
 
 def limpar_anos(valor):
-    if isinstance(valor, str):
-        valor = valor.strip()
-        if valor in ("0000", "0"):
-            return None
+    if pd.isna(valor):
+        return np.nan
     try:
-        ano = int(valor)
+        if isinstance(valor, str):
+            valor = valor.strip()
+            if valor in ("0000", "0"):
+                return np.nan
+        ano = float(valor)  # Changed from int to float
         if 1900 <= ano <= 2025:
             return ano
-        return None
-    except ValueError:
-        # logging.error(f"Erro ao converter ano: {valor}")
-        return None
+        return np.nan
+    except (ValueError, TypeError):
+        return np.nan
 
 
 def clean_data(
     df, colunas_texto=None, colunas_data=None, colunas_anos=None, colunas_numeros=None
 ):
+    df = df.copy()  # Create a copy to avoid modifying original
     df = remove_colunas_dominantes(df)
     df = remove_colunas_irrelevantes(df)
+    
     if colunas_texto:
         for col in colunas_texto:
             df[col] = df[col].apply(limpar_texto)
@@ -125,10 +157,10 @@ def clean_data(
             df[col] = df[col].apply(limpar_datas)
     if colunas_anos:
         for col in colunas_anos:
-            df[col] = df[col].apply(limpar_anos)
+            df[col] = pd.to_numeric(df[col].apply(limpar_anos), errors='coerce')
     if colunas_numeros:
         for col in colunas_numeros:
-            df[col] = df[col].apply(limpar_numeros_strings)
+            df[col] = pd.to_numeric(df[col].apply(limpar_numeros), errors='coerce')
     return df
 
 

@@ -29,6 +29,11 @@ def train_model():
     subprocess.run(["python", "src/train_model.py"], check=True)
     logging.info('Finalizou train_model')
 
+def tune_model():
+    logging.info('Iniciando tune_model')
+    subprocess.run(["python", "src/tune_model.py"], check=True)
+    logging.info('Finalizou tune_model')
+
 
 def main(steps):
 
@@ -51,6 +56,8 @@ def main(steps):
         feature_engineering()
     if "train_model" in steps:
         train_model()
+    if "tune" in steps:
+        tune_model()
 
 
 if __name__ == "__main__":

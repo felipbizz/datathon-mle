@@ -1,0 +1,103 @@
+Metadata-Version: 2.4
+Name: datathon-mle
+Version: 0.1.0
+Summary: Projeto fase 5 da pós tech
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: bentoml>=1.4.12
+Requires-Dist: deep-translator>=1.11.4
+Requires-Dist: hf-xet>=1.0.3
+Requires-Dist: lightgbm>=4.6.0
+Requires-Dist: lime>=0.2.0.1
+Requires-Dist: matplotlib>=3.10.1
+Requires-Dist: mlflow>=2.22.0
+Requires-Dist: nltk>=3.9.1
+Requires-Dist: numpy==1.26.4
+Requires-Dist: pandas>=2.2.3
+Requires-Dist: pandera>=0.23.1
+Requires-Dist: polars>=1.22.0
+Requires-Dist: pyarrow>=19.0.1
+Requires-Dist: pytest>=8.3.5
+Requires-Dist: pytest-cov>=6.1.1
+Requires-Dist: python-dotenv>=1.1.0
+Requires-Dist: rapidfuzz>=3.13.0
+Requires-Dist: scikit-learn>=1.6.1
+Requires-Dist: seaborn>=0.13.2
+Requires-Dist: sentence-transformers>=4.1.0
+Requires-Dist: setuptools>=78.1.0
+Requires-Dist: shap>=0.47.1
+Requires-Dist: sweetviz>=2.3.1
+Requires-Dist: torch>=2.6.0
+Requires-Dist: tqdm>=4.67.1
+Requires-Dist: transformers>=4.51.3
+Requires-Dist: unidecode>=1.3.8
+Requires-Dist: vadersentiment>=3.3.2
+Requires-Dist: xgboost>=3.0.0
+Requires-Dist: ydata-profiling>=4.12.2
+
+# Datathon MLE – Previsão de Sucesso do Candidato
+
+## Objetivo
+
+Este projeto tem como objetivo desenvolver uma solução de Machine Learning para prever o sucesso de candidatos em processos seletivos, utilizando dados reais da empresa Decision. O foco é criar uma pipeline completa, desde a análise exploratória até o deployment do modelo, visando apoiar decisões de recrutamento e seleção.
+
+## Estrutura do Projeto
+
+```
+├── main.py
+├── pyproject.toml
+├── uv.lock
+├── src/
+│   ├── generate_data_dictionary.py
+│   ├── preprocess_data.py
+│   ├── eda.py
+│   ├── check_data_quality.py
+│   ├── definir_target.py
+│   ├── consolidar_dados.py
+│   ├── feature_engineering.py
+│   └── train_model.py
+├── data/
+│   └── csv/, images/, reports/
+├── Datathon Decision/
+│   └── 1_raw, 2_bronze, 3_silver, ...
+├── notebooks/
+│   └── 01_exploratoria.ipynb, ...
+├── docs/
+│   └── planejamento_projeto.md, data_dictionary_template.md, ...
+```
+
+## Principais Arquivos da src
+
+- **generate_data_dictionary.py**: Geração automática do dicionário de dados.
+- **preprocess_data.py**: Pré-processamento geral dos dados.
+- **eda.py**: Análises exploratórias e geração de gráficos.
+- **check_data_quality.py**: Verificação de integridade e qualidade dos dados.
+- **definir_target.py**: Definição e transformação da variável-alvo.
+- **consolidar_dados.py**: Consolidação e junção dos datasets principais.
+- **feature_engineering.py**: Criação e transformação de features.
+- **train_model.py**: Treinamento, validação e salvamento do modelo.
+
+## Como Rodar o Projeto
+
+1. **Pré-requisitos**
+   - Python 3.12+
+   - [UV](https://github.com/astral-sh/uv) instalado como gerenciador de pacotes
+
+2. **Instalação das Dependências**
+   ```bash
+   uv pip install -r pyproject.toml
+   ```
+
+3. **Execução dos Scripts**
+   - Para rodar os scripts utilize o comando `make` na raiz do projeto, ele retornará a documentação com os comandos disponíveis, ou visualize no arquivo `Makefile`
+
+## Documentação
+
+- O dicionário de dados está em data_dictionary_template.md.
+
+## Observações
+
+- O projeto segue boas práticas de MLE, com scripts modulares e documentação.
+- O deployment do modelo e a API estão planejados para as próximas etapas.
+
+---
