@@ -1,0 +1,12 @@
+2025-05-16 13:44:05,168 - setup - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-16 13:44:05,168 - setup - INFO - Buscando rotas em api/controllers
+2025-05-16 13:44:38,190 - setup - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-16 13:44:38,190 - setup - INFO - Buscando rotas em controllers
+2025-05-16 13:44:38,190 - setup - DEBUG - Módulos encontrados: ['model_controller.py']
+2025-05-16 13:44:38,191 - setup - INFO - Carregando rotas de : model_controller.py
+2025-05-16 13:45:10,566 - setup - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-16 13:45:10,566 - setup - INFO - Buscando rotas em controllers
+2025-05-16 13:45:10,567 - setup - DEBUG - Módulos encontrados: ['model_controller.py']
+2025-05-16 13:45:10,567 - setup - INFO - Carregando rotas de : model_controller.py
+2025-05-16 13:45:10,570 - setup - INFO - Extraindo atributos do módulo model_controller
+2025-05-16 13:45:10,571 - setup - INFO - Rotas carregadas de model_controller 

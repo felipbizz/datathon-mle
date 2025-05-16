@@ -56,3 +56,8 @@ addopts = "-ra -q --cov=src"
 testpaths = [
     "tests",
 ]
+
+[tool.uv.workspace]
+members = [
+    "api",
+]

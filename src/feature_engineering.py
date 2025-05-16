@@ -187,9 +187,11 @@ def main() -> None:
 
     df = feature_generator.adicionar_similaridade_titulo_vaga(df)
     
-    df = df.drop(columns=['titulo', 'comentario', 'titulo_vaga', 'prazo_contratacao','prioridade_vaga', 'nivel profissional', 'nivel_ingles',
+    drop_columns = ['titulo', 'comentario', 'titulo_vaga', 'prazo_contratacao','prioridade_vaga', 'nivel profissional', 'nivel_ingles',
                             'nivel_espanhol', 'areas_atuacao', 'principais_atividades','competencia_tecnicas_e_comportamentais', 'demais_observacoes',
-                            'equipamentos_necessarios', 'habilidades_comportamentais_necessarias', 'valor_venda','valor_compra_1',] )
+                            'equipamentos_necessarios', 'habilidades_comportamentais_necessarias', 'valor_venda','valor_compra_1',]
+
+    df = df.drop(columns=drop_columns)
 
     df.to_parquet(paths["dataset_features"], index=False)
     logging.info(f"Dataset com features salvos em {paths['dataset_features']}")
