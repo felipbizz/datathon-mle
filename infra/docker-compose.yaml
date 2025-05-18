@@ -39,9 +39,9 @@ services:
     stdin_open: true # docker run -i
     tty: true        # docker run -t
     volumes:
-       - ./volumes/grafana/var:/var/lib/grafana
-       - ./volumes/grafana/etc:/etc/grafana
-       - ./volumes/grafana/log:/var/log/grafana
+       - ./volumes/grafana/var:/var/lib/grafana:rw
+       - ./volumes/grafana/etc:/etc/grafana:rw
+       - ./volumes/grafana/log:/var/log/grafana:rw
     ports:
       - 3000:3000
     depends_on:

@@ -2,18 +2,30 @@
 INFRA_DIR=infra
 SCRIPTS_DIR=scripts
 
+MAKEFLAGS += --no-print-directory
+
 all: help ## Abre a documentação mostrando os comandos disponíveis
 
 create-infra: ## Cria os containers de infraestrutura
 	@echo "Creating Docker containers..."
-	cd $(INFRA_DIR) && docker compose up -d
+	@cd $(INFRA_DIR) && docker compose up -d
+	@$(MAKE) set_tracking_uri adjust-permissions
 
 destroy-infra: ## Remove os containers de infraestrutura
 	@echo "Destroying Docker containers..."
 	cd $(INFRA_DIR) && docker compose down
 
+adjust-permissions: ## Ajusta as permissões dos volumes do docker
+	@echo "Adjusting permissions..."
+	@sudo chown -R 1000:1000 $(INFRA_DIR)/volumes/grafana
+
+set_tracking_uri: ## Define a URI de rastreamento do MLflow
+	@echo "Definindo URI de rastreamento do MLflow..."
+	@export MLFLOW_TRACKING_URI=http://localhost:5000
+
 start-infra: ## Inicializa os containers de infraestrutura sem criar novos
 	@echo "Starting Docker containers..."
+	$(MAKE) set_tracking_uri adjust-permissions
 	cd $(INFRA_DIR) && docker compose start
 
 stop-infra: ## Para os containers de infraestrutura sem removê-los
@@ -21,8 +33,8 @@ stop-infra: ## Para os containers de infraestrutura sem removê-los
 	cd $(INFRA_DIR) && docker compose stop
 
 initialize-data: ## Baixa os arquivos de dados
-	@echo "Downloading data files..."
-	$(SCRIPTS_DIR)/initialize_data.sh
+	@echo "Creating folder structure... remember to upload the raw data"
+	@$(SCRIPTS_DIR)/initialize_data.sh
 
 purge_experiments: ## Limpa o banco de dados
 	@echo "Clearing database..."
@@ -56,10 +68,6 @@ serve_model: ## Roda o modelo em um container docker
 	@lc_model=$(shell echo $(model) | tr '[:upper:]' '[:lower:]'); \
 	docker run -dit -p 8080:8080 --name $$lc_model-$(version) $${lc_model}:$(version) 
 
-set_tracking_uri: ## Define a URI de rastreamento do MLflow
-	@echo "Definindo URI de rastreamento do MLflow..."
-	export MLFLOW_TRACKING_URI=http://localhost:5000
-
 build-bentoml: ## Cria o bentoml
 	@echo "Criando bentoml..."
 	cd src && bentoml build 
@@ -75,7 +83,7 @@ train:  ## Roda etapa de treinamento
 	python main.py --steps train_model
 
 tune: ## Roda etapa de ajuste de hiperparâmetros
-	python main.py --steps tune_model
+	python main.py --steps tune
 
 preprocess: ## Roda apenas preprocessamento
 	python main.py --steps preprocess
