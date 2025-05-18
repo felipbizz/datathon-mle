@@ -1,5 +1,8 @@
 from mlflow.tracking import MlflowClient
+from mle_utils.logger import set_log
 import argparse
+
+logger = set_log("model_mgmt")
 
 client = MlflowClient("http://127.0.0.1:5000")
 
@@ -8,20 +11,20 @@ def purge_registered_models():
     Remove all registered models from the MLflow tracking server.
     """
     # List all registered models
-    print("Removendo todos os modelos registrados...")
+    logger.info("Removendo todos os modelos registrados...")
     for rm in client.search_registered_models():
         client.delete_registered_model(name=rm.name)
-        print(f"Modelo {rm.name} removido com sucesso.")
+        logger.info(f"Modelo {rm.name} removido com sucesso.")
 
 def list_registered_models():
     """
     List all registered models from the MLflow tracking server.
     """
     # List all registered models
-    print("Listando todos os modelos registrados...")
+    logger.info("Listando todos os modelos registrados...")
     for rm in client.search_registered_models():
-        print(f"Modelo: {rm.name}, Versão: {rm.latest_versions[0].version}, Status: {rm.latest_versions[0].current_stage}")
-    print("Modelos registrados listados com sucesso.")
+        logger.info(f"Modelo: {rm.name}, Versão: {rm.latest_versions[0].version}, Status: {rm.latest_versions[0].current_stage}")
+    logger.info("Modelos registrados listados com sucesso.")
 
 def main(action):
 

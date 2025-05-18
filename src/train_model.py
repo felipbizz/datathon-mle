@@ -26,6 +26,9 @@ import psutil
 import pickle
 import xgboost as xgb
 import lightgbm as lgb
+from mle_datathon.utils import set_log
+
+logger = set_log("train_model")
 
 
 def log_system_info():
@@ -59,7 +62,7 @@ def main() -> None:
         if col != "target" and pd.api.types.is_numeric_dtype(df[col])
     ]
     X = df[features]
-    print(f"Features usadas no treino: {features}")
+    logger.info(f"Features usadas no treino: {features}")
 
     X_train, X_test, y_train, y_test = train_test_split(
         X,
@@ -92,13 +95,13 @@ def main() -> None:
                                      subsample=model_cfg["subsample"],
                                      colsample_bytree=model_cfg["colsample_bytree"]
                                      ),
-        "LightGBM": lgb.LGBMClassifier(random_state=model_cfg["random_state"],
-                                       learning_rate=model_cfg["learning_rate"],
-                                       n_estimators=model_cfg["n_estimators"],
-                                       max_depth=model_cfg["max_depth"],
-                                       subsample=model_cfg["subsample"],
-                                       colsample_bytree=model_cfg["colsample_bytree"]
-                                       ),
+        # "LightGBM": lgb.LGBMClassifier(random_state=model_cfg["random_state"],
+        #                                learning_rate=model_cfg["learning_rate"],
+        #                                n_estimators=model_cfg["n_estimators"],
+        #                                max_depth=model_cfg["max_depth"],
+        #                                subsample=model_cfg["subsample"],
+        #                                colsample_bytree=model_cfg["colsample_bytree"]
+        #                                ),
     }
 
     results = {}
@@ -109,7 +112,7 @@ def main() -> None:
         with mlflow.start_run(run_name=run_name) as run:
             log_system_info()
             
-            print(f"\nTreinando modelo {name}...")
+            logger.info(f"\nTreinando modelo {name}...")
             model.fit(X_train_scaled, y_train)
             y_pred = model.predict(X_test_scaled)
             signature = infer_signature(X_test_scaled, y_pred)
@@ -138,19 +141,25 @@ def main() -> None:
             
             results[name] = {"auc": auc, "f1": f1, "precision": prec, "recall": rec}
             results[name].update({ "run_id": run.info.run_id })
-            print(f"\nRun ID: {run.info.run_id}")
-            print(f"\nModelo: {name}")
-            print(
+            logger.info(f"\nRun ID: {run.info.run_id}")
+            logger.info(f"\nModelo: {name}")
+            logger.info(
                 f"AUC: {auc:.3f} | F1: {f1:.3f} | Precision: {prec:.3f} | Recall: {rec:.3f}"
             )
-            print(classification_report(y_test, y_pred))
+            logger.info(classification_report(y_test, y_pred))
 
+    logger.info("\nResultados dos modelos:")
+    for name, metrics in results.items():
+        logger.info(
+            f"{name:<20}: AUC={metrics['auc']:.3f} | F1={metrics['f1']:.3f} | Precision={metrics['precision']:.3f} | Recall={metrics['recall']:.3f}"
+        )
+        
     best_model_name = max(results, key=lambda k: results[k]["auc"])
     best_run_id = results[best_model_name]["run_id"]
     best_model = models[best_model_name]
 
     result = mlflow.register_model(f"runs:/{best_run_id}/{best_model_name}", f"{best_model_name}")
-    print(f"Modelo registrado: {result.name} (AUC={results[best_model_name]['auc']:.3f}, RunID: {best_run_id})")
+    logger.info(f"Modelo registrado: {result.name} (AUC={results[best_model_name]['auc']:.3f}, RunID: {best_run_id})")
 
     with open(paths["modelo_treinado"], "wb") as f:
         pickle.dump(
@@ -162,10 +171,10 @@ def main() -> None:
             },
             f,
         )
-    print(
+    logger.info(
         f"\nMelhor modelo salvo: {best_model_name} (AUC={results[best_model_name]['auc']:.3f})"
     )
-    print(f"Arquivo: {paths['modelo_treinado']}")
+    logger.info(f"Arquivo: {paths['modelo_treinado']}")
 
     # Feature importance logging
     with mlflow.start_run(run_id=best_run_id):
@@ -174,8 +183,10 @@ def main() -> None:
             feature_importance = pd.Series(importances, index=features).sort_values(
                 ascending=False
             )
+            logger.info(f"Feature importances: {feature_importance}")
             importance_path = paths.get(f"feature_importance_{best_model_name.lower()}")
             if importance_path:
+                logger.info(f"Salvando importâncias das features em {importance_path}")
                 feature_importance.to_csv(importance_path)
                 mlflow.log_artifact(importance_path)
         elif isinstance(best_model, LogisticRegression):
@@ -183,9 +194,11 @@ def main() -> None:
             coef_importance = pd.Series(coefs, index=features).sort_values(
                 key=abs, ascending=False
             )
+            logger.info(f"Coeficientes de importância: {coef_importance}")
             coef_importance.to_csv(paths["feature_importance_lr"])
             mlflow.log_artifact(paths["feature_importance_lr"])
-            
+
+        logger.info(f"Salvando modelo treinado em {paths['modelo_treinado']}")    
         mlflow.log_artifact(paths["modelo_treinado"])
 
 

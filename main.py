@@ -1,38 +1,58 @@
 import argparse
 import subprocess
-from src.log_config import logging
+from mle_datathon.logger import set_log
+from mle_datathon.model import train, tune
+from mle_datathon import ModelRegister
+# from mle_datathon.train_model import train
+
 import mlflow
+from mlflow.tracking import MlflowClient
+
+
+client = MlflowClient("http://127.0.0.1:5000")
+
+logger = set_log("main")
+mr = ModelRegister(client=client)
 
 
 def preprocess():
-    logging.info('Iniciando preprocess')
+    logger.info('Iniciando preprocess')
     subprocess.run(["python", "src/preprocess_data.py"], check=True)
-    logging.info('Finalizou preprocess')
+    logger.info('Finalizou preprocess')
 
 def consolidate():
-    logging.info('Iniciando consolidar_dados')
+    logger.info('Iniciando consolidar_dados')
     subprocess.run(["python", "src/consolidar_dados.py"], check=True)
-    logging.info('Finalizou consolidar_dados')
+    logger.info('Finalizou consolidar_dados')
 
 def define_target():
-    logging.info('Iniciando definir_target')
+    logger.info('Iniciando definir_target')
     subprocess.run(["python", "src/definir_target.py"], check=True)
-    logging.info('Finalizou definir_target')
+    logger.info('Finalizou definir_target')
 
 def feature_engineering():
-    logging.info('Iniciando feature_engineering')
+    logger.info('Iniciando feature_engineering')
     subprocess.run(["python", "src/feature_engineering.py"], check=True)
-    logging.info('Finalizou feature_engineering')
+    logger.info('Finalizou feature_engineering')
 
 def train_model():
-    logging.info('Iniciando train_model')
-    subprocess.run(["python", "src/train_model.py"], check=True)
-    logging.info('Finalizou train_model')
+    logger.info('Iniciando train_model')
+    # subprocess.run(["python", "src/train_model.py"], check=True)
+    train()
+    logger.info('Finalizou train_model')
 
 def tune_model():
-    logging.info('Iniciando tune_model')
-    subprocess.run(["python", "src/tune_model.py"], check=True)
-    logging.info('Finalizou tune_model')
+    logger.info('Iniciando tune_model')
+    tune()
+    logger.info('Finalizou tune_model')
+
+def list_registered_models():
+    logger.info(f'Modelos Registrados:\n{mr.list_registered_models()}')
+
+def purge_registered_models():
+    mr.purge_registered_models()
+    logger.info('Modelos registrados removidos com sucesso!')
+    
 
 
 def main(steps):
@@ -58,6 +78,10 @@ def main(steps):
         train_model()
     if "tune" in steps:
         tune_model()
+    if "list_registered_models" in steps:
+        list_registered_models()
+    if "purge_registered_models" in steps:
+        purge_registered_models()
 
 
 if __name__ == "__main__":

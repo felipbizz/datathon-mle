@@ -1,49 +1,34 @@
-model:
-  colsample_bytree: 0.8
-  learning_rate: 0.1
-  lr_max_iter: 1000
-  max_depth: 5
-  n_estimators: 100
-  random_state: 42
-  subsample: 0.8
-  test_size: 0.2
-  tuned_params:
-    LightGBM:
-      colsample_bytree: 0.8
-      learning_rate: 0.1
-      max_depth: 7
-      n_estimators: 200
-      subsample: 0.8
-    LogisticRegression:
-      C: 0.001
-      penalty: l2
-      solver: liblinear
-    RandomForest:
-      max_depth: 30
-      min_samples_leaf: 1
-      min_samples_split: 10
-      n_estimators: 100
-    XGBoost:
-      colsample_bytree: 0.9
-      learning_rate: 0.1
-      max_depth: 7
-      n_estimators: 200
-      subsample: 0.8
+# Central config for datathon-mle pipeline
+# Adjust paths and parameters as needed
+
+# Data paths
 paths:
-  applicants_bronze: /home/thales/postech/phase5/datathon-mle/Datathon Decision/2_bronze/applicants.parquet
-  applicants_json: /home/thales/postech/phase5/datathon-mle/Datathon Decision/1_raw/applicants.json
-  applicants_silver: /home/thales/postech/phase5/datathon-mle/Datathon Decision/3_silver/applicants.parquet
-  dataset_consolidado: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/dataset_consolidado.parquet
-  dataset_features: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/dataset_features.parquet
-  dataset_modelagem: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/dataset_modelagem.parquet
-  feature_importance_lgm: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/feature_importance_lgb.csv
-  feature_importance_lr: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/feature_importance_lr.csv
-  feature_importance_rf: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/feature_importance_rf.csv
-  feature_importance_xgb: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/feature_importance_xgb.csv
-  modelo_treinado: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/modelo_treinado.pkl
-  prospects_bronze: /home/thales/postech/phase5/datathon-mle/Datathon Decision/2_bronze/prospects.parquet
-  prospects_json: /home/thales/postech/phase5/datathon-mle/Datathon Decision/1_raw/prospects.json
-  prospects_silver: /home/thales/postech/phase5/datathon-mle/Datathon Decision/3_silver/prospects.parquet
-  vagas_bronze: /home/thales/postech/phase5/datathon-mle/Datathon Decision/2_bronze/vagas.parquet
-  vagas_json: /home/thales/postech/phase5/datathon-mle/Datathon Decision/1_raw/vagas.json
-  vagas_silver: /home/thales/postech/phase5/datathon-mle/Datathon Decision/3_silver/vagas.parquet
+  applicants_json: "Datathon Decision/1_raw/applicants.json"
+  prospects_json: "Datathon Decision/1_raw/prospects.json"
+  vagas_json: "Datathon Decision/1_raw/vagas.json"
+  applicants_bronze: "Datathon Decision/2_bronze/applicants.parquet"
+  prospects_bronze: "Datathon Decision/2_bronze/prospects.parquet"
+  vagas_bronze: "Datathon Decision/2_bronze/vagas.parquet"
+  applicants_silver: "Datathon Decision/3_silver/applicants.parquet"
+  prospects_silver: "Datathon Decision/3_silver/prospects.parquet"
+  vagas_silver: "Datathon Decision/3_silver/vagas.parquet"
+  dataset_consolidado: "Datathon Decision/4_gold/dataset_consolidado.parquet"
+  dataset_modelagem: "Datathon Decision/4_gold/dataset_modelagem.parquet"
+  dataset_features: "Datathon Decision/4_gold/dataset_features.parquet"
+  modelo_treinado: "Datathon Decision/4_gold/modelo_treinado.pkl"
+  feature_importance_rf: "Datathon Decision/4_gold/feature_importance_rf.csv"
+  feature_importance_xgb: "Datathon Decision/4_gold/feature_importance_xgb.csv"
+  feature_importance_lgm: "Datathon Decision/4_gold/feature_importance_lgb.csv"
+  feature_importance_lr: "Datathon Decision/4_gold/feature_importance_lr.csv"
+
+# Model parameters
+model:
+  test_size: 0.2
+  random_state: 42
+  lr_max_iter: 1000  # Add this line - controls max iterations for LogisticRegression
+  learning_rate: 0.1
+  max_depth: 5
+  subsample: 0.8
+  colsample_bytree: 0.8
+  n_estimators: 100
+  

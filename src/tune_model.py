@@ -17,6 +17,10 @@ import xgboost as xgb
 import lightgbm as lgb
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from mle_utils.logger import set_log
+import os
+
+logger = set_log("tune_model")
 
 def tune_models(X_train, y_train, config, cv=5):
     """Perform hyperparameter tuning for all models."""
@@ -67,7 +71,7 @@ def tune_models(X_train, y_train, config, cv=5):
     
     for name, model in models.items():
         with mlflow.start_run(run_name=f'tuning_{name}_{datetime.now().strftime("%Y-%m-%d_%H_%M_%S")}'):
-            print(f"\nTuning {name}...")
+            logger.info(f"\nTuning {name}...")
             
             grid_search = GridSearchCV(
                 estimator=model,
@@ -87,11 +91,25 @@ def tune_models(X_train, y_train, config, cv=5):
             
             best_params[name] = grid_search.best_params_
             
-            print(f"Best parameters for {name}:")
-            print(grid_search.best_params_)
-            print(f"Best CV score: {grid_search.best_score_:.4f}")
+            logger.info(f"Best parameters for {name}:")
+            logger.info(grid_search.best_params_)
+            logger.info(f"Best CV score: {grid_search.best_score_:.4f}")
     
     return best_params
+
+def update_config_file(config):
+
+    """Save old config file with a timestamp."""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    old_config_path = f"config_{timestamp}.yaml"
+    os.rename("config.yaml", old_config_path)
+    logger.info(f"Old config file saved as {old_config_path}.")
+
+    """Update the config file with the best parameters."""
+    with open("config.yaml", "w") as f:
+        yaml.dump(config, f)
+    logger.info("Config file updated with best parameters.")
+
 
 def main():
     config = load_config()
@@ -125,11 +143,7 @@ def main():
     # Update config with best parameters
     config["model"]["tuned_params"] = best_params
     
-    # Save updated config
-    with open("config.yaml", "w") as f:
-        yaml.dump(config, f)
-    
-    print("\nBest parameters saved to config.yaml")
+    update_config_file(config)
 
 if __name__ == "__main__":
     main()

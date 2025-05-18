@@ -1,5 +1,8 @@
 import pandas as pd
 from config import load_config, get_abs_path
+from mle_utils.logger import set_log
+
+logger = set_log("consolidar_dados")
 
 config = load_config()
 
@@ -22,8 +25,8 @@ def consolidar_dados():
     df = df_prospects.merge(df_vagas, on="cod_vaga", how="left", suffixes=("", "_vaga"))
 
     missing = df.isnull().mean().sort_values(ascending=False)
-    print("Colunas com maior proporção de valores ausentes:")
-    print(missing[missing > 0.3])
+    logger.info("Colunas com maior proporção de valores ausentes:")
+    logger.info(missing[missing > 0.3])
 
     # precisa melhorar o preenchimento de valores ausentes
     colunas_cat = df.select_dtypes(include="object").columns
@@ -35,7 +38,7 @@ def consolidar_dados():
 
     output_path = get_abs_path(paths["dataset_consolidado"])
     df.to_parquet(output_path, index=False)
-    print(f"Dataset consolidado salvo em: {output_path}")
+    logger.info(f"Dataset consolidado salvo em: {output_path}")
 
 if __name__ == '__main__':
     consolidar_dados()

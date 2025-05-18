@@ -1,4 +1,4 @@
-from src.utils import set_log
+from mle_utils.logger import set_log
 import pandas as pd
 
 logger = set_log('check_data_quality')

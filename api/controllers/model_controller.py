@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Body
 from typing import Annotated, Any
-from src.utils import set_log
-# from business_rules import model
-# from business_rules.tune_model import tuna_modelo_autolstm
-# from business_rules.train_model import train_model
+from mle_utils.logger import set_log
+
 import os
 
 from prometheus_client import Summary, Counter

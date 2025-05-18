@@ -1,5 +1,8 @@
 import pandas as pd
 from pathlib import Path
+from mle_utils.logger import set_log
+
+logger = set_log("generate_data_dictionary")
 
 base_path = Path("../Datathon Decision/3_silver")
 arquivos = {
@@ -23,4 +26,4 @@ if __name__ == "__main__":
             df = pd.read_parquet(caminho)
             md = gerar_template_dicionario(nome, df)
             f.write(md + "\n\n")
-    print("Template de dicionário de dados gerado em data_dictionary_template.md")
+    logger.info("Template de dicionário de dados gerado em data_dictionary_template.md")
