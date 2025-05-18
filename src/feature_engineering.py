@@ -4,13 +4,72 @@ Loads all paths and parameters from config.yaml for reproducibility.
 """
 
 import pandas as pd
+import numpy as np
 from log_config import logger
 from config import load_config, get_abs_path
-from typing import Any, List
+from typing import Any, List, Dict
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer, util
 from rapidfuzz import fuzz
+from sklearn.preprocessing import OneHotEncoder
+import joblib
+import os
 
+
+def clean_features_data(df):
+    colunas_remover = [
+        'analista_responsavel',
+        'cidade',
+        'cliente',
+        'cod_vaga',
+        'codigo',
+        'data_candidatura',
+        'data_final',
+        'data_inicial',
+        'data_requicisao',
+        'empresa_divisao',
+        'estado',
+        'limite_esperado_para_contratacao',
+        'local_trabalho',
+        'nome',
+        'recrutador',
+        'regiao',
+        'requisitante',
+        'situacao_candidado',
+        'solicitante_cliente',
+        'ultima_atualizacao',
+    ]
+    colunas_remover_2 = [
+        'titulo',
+        'comentario',
+        'titulo_vaga',
+        'prazo_contratacao',
+        'prioridade_vaga',
+        'nivel profissional',
+        'nivel_ingles',
+        'nivel_espanhol',
+        'areas_atuacao',
+        'principais_atividades',
+        'competencia_tecnicas_e_comportamentais',
+        'demais_observacoes',
+        'equipamentos_necessarios',
+        'habilidades_comportamentais_necessarias',
+        'valor_venda',
+        'valor_compra_1',
+    ]
+
+    colunas_remover.extend(colunas_remover_2)
+
+    df = df.drop(columns=colunas_remover)
+
+    features = [
+        col
+        for col in df.columns
+        if col != 'target' and pd.api.types.is_numeric_dtype(df[col])
+    ]
+    X = df[features]
+
+    return X
 
 def coluna_valida(df: pd.DataFrame, col: str) -> bool:
     """Check if a column is valid for feature creation."""
@@ -154,25 +213,28 @@ class TextFeatureGenerator:
         return df
 
 
-def cria_features(df):
+def cria_features(df, save_encoders=False, encoders_path=None):
+    # Dictionary to store encoders
+    encoders = {}
+    
     # 1. Nível acadêmico do candidato (one-hot encoding)
-    if coluna_valida(df, 'nivel_academico'):
-        df = pd.get_dummies(
-            df, columns=['nivel_academico'], prefix='nivel_acad', dummy_na=True
-        )
-        logger.info('[OK] One-hot de nivel_academico criado.')
-    else:
-        logger.info('[SKIP] One-hot de nivel_academico não criado.')
-
+    nivel_acad_encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+    nivel_acad_encoded = nivel_acad_encoder.fit_transform(df[['nivel_academico']])
+    nivel_acad_columns = [f'nivel_acad_{cat}' for cat in nivel_acad_encoder.categories_[0]]
+    df_nivel_acad = pd.DataFrame(nivel_acad_encoded, columns=nivel_acad_columns, index=df.index)
+    df = pd.concat([df, df_nivel_acad], axis=1)
+    encoders['nivel_academico'] = nivel_acad_encoder
+    logger.info('[OK] One-hot de nivel_academico criado.')
+    
     # 2. Tipo de contratação da vaga (one-hot encoding)
-    if coluna_valida(df, 'tipo_contratacao'):
-        df = pd.get_dummies(
-            df, columns=['tipo_contratacao'], prefix='tipo_contr', dummy_na=True
-        )
-        logger.info('[OK] One-hot de tipo_contratacao criado.')
-    else:
-        logger.info('[SKIP] One-hot de tipo_contratacao não criado.')
-
+    tipo_contr_encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+    tipo_contr_encoded = tipo_contr_encoder.fit_transform(df[['tipo_contratacao']])
+    tipo_contr_columns = [f'tipo_contr_{cat}' for cat in tipo_contr_encoder.categories_[0]]
+    df_tipo_contr = pd.DataFrame(tipo_contr_encoded, columns=tipo_contr_columns, index=df.index)
+    df = pd.concat([df, df_tipo_contr], axis=1)
+    encoders['tipo_contratacao'] = tipo_contr_encoder
+    logger.info('[OK] One-hot de tipo_contratacao criado.')
+    
     campos_texto = [
         'principais_atividades',
         'competencia_tecnicas_e_comportamentais',
@@ -185,6 +247,14 @@ def cria_features(df):
 
     df = feature_generator.adicionar_similaridade_titulo_vaga(df)
 
+    # Save encoders if requested
+    if save_encoders and encoders_path:
+        os.makedirs(encoders_path, exist_ok=True)
+        for name, encoder in encoders.items():
+            encoder_file = os.path.join(encoders_path, f'{name}_encoder.joblib')
+            joblib.dump(encoder, encoder_file)
+            logger.info(f'[OK] Encoder {name} salvo em {encoder_file}')
+
     return df
 
 
@@ -196,7 +266,9 @@ def main() -> None:
 
     df = pd.read_parquet(paths['dataset_modelagem'])
 
-    df = cria_features(df)
+    # Create encoders directory if it doesn't exist
+    encoders_path = os.path.join(os.path.dirname(paths['dataset_modelagem']), 'encoders')
+    df = cria_features(df, save_encoders=True, encoders_path=encoders_path)
 
     df = df.drop(
         columns=[
@@ -221,6 +293,52 @@ def main() -> None:
 
     df.to_parquet(paths['dataset_features'], index=False)
     logger.info(f'Dataset com features salvos em {paths["dataset_features"]}')
+
+
+def transform_new_data(df: pd.DataFrame, encoders_path: str) -> pd.DataFrame:
+    """
+    Transforma novos dados usando os encoders salvos.
+    
+    Args:
+        df: DataFrame com os dados a serem transformados
+        encoders_path: Caminho para o diretório onde os encoders estão salvos
+        
+    Returns:
+        DataFrame com as features transformadas
+    """
+    logger.info('[Inferência] Carregando encoders salvos...')
+    
+    # Carrega os encoders salvos
+    nivel_acad_encoder = joblib.load(os.path.join(encoders_path, 'nivel_academico_encoder.joblib'))
+    tipo_contr_encoder = joblib.load(os.path.join(encoders_path, 'tipo_contratacao_encoder.joblib'))
+    
+    # Aplica transformação nos novos dados
+    logger.info('[Inferência] Aplicando transformação de nivel_academico...')
+    nivel_acad_encoded = nivel_acad_encoder.transform(df[['nivel_academico']])
+    nivel_acad_columns = [f'nivel_acad_{cat}' for cat in nivel_acad_encoder.categories_[0]]
+    df_nivel_acad = pd.DataFrame(nivel_acad_encoded, columns=nivel_acad_columns, index=df.index)
+    
+    logger.info('[Inferência] Aplicando transformação de tipo_contratacao...')
+    tipo_contr_encoded = tipo_contr_encoder.transform(df[['tipo_contratacao']])
+    tipo_contr_columns = [f'tipo_contr_{cat}' for cat in tipo_contr_encoder.categories_[0]]
+    df_tipo_contr = pd.DataFrame(tipo_contr_encoded, columns=tipo_contr_columns, index=df.index)
+    
+    # Combina com o dataframe original
+    df = pd.concat([df, df_nivel_acad, df_tipo_contr], axis=1)
+    
+    # Aplica as transformações de texto
+    campos_texto = [
+        'principais_atividades',
+        'competencia_tecnicas_e_comportamentais',
+        'demais_observacoes',
+        'comentario',
+    ]
+    
+    feature_generator = TextFeatureGenerator()
+    df = feature_generator.transform(df, campos_texto)
+    df = feature_generator.adicionar_similaridade_titulo_vaga(df)
+    
+    return df
 
 
 if __name__ == '__main__':
