@@ -1,4 +1,4 @@
-from log_config import logging
+from log_config import logger
 import pandas as pd
 from config import load_config, get_abs_path
 
@@ -56,11 +56,11 @@ def define_target():
 
     # Salva o dataset de modelagem usando caminho absoluto
     df_model.to_parquet(get_abs_path(paths["dataset_modelagem"]), index=False)
-    logging.info(f"Dataset para modelagem salvo em {paths['dataset_modelagem']}")
-    logging.info("Distribuição da variável-alvo:")
-    logging.info(df["target"].value_counts())
-    logging.info("Distribuição das categorias de situação do candidato:")
-    logging.info(df["situacao_candidado"].value_counts())
+    logger.info(f"Dataset para modelagem salvo em {paths['dataset_modelagem']}")
+    logger.info("Distribuição da variável-alvo:")
+    logger.info(df["target"].value_counts())
+    logger.info("Distribuição das categorias de situação do candidato:")
+    logger.info(df["situacao_candidado"].value_counts())
 
 if __name__ == '__main__':
     define_target()

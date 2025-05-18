@@ -1,5 +1,6 @@
 import pandas as pd
 from config import load_config, get_abs_path
+from log_config import logger
 
 config = load_config()
 
@@ -22,20 +23,12 @@ def consolidar_dados():
     df = df_prospects.merge(df_vagas, on="cod_vaga", how="left", suffixes=("", "_vaga"))
 
     missing = df.isnull().mean().sort_values(ascending=False)
-    print("Colunas com maior proporção de valores ausentes:")
-    print(missing[missing > 0.3])
-
-    # precisa melhorar o preenchimento de valores ausentes
-    colunas_cat = df.select_dtypes(include="object").columns
-    for col in colunas_cat:
-        df[col] = df[col].fillna("desconhecido")
-
-    # Precisa melhorar a padronização de datas
-    df["data_candidatura"] = pd.to_datetime(df["data_candidatura"], errors="coerce")
+    logger.info("Colunas com maior proporção de valores ausentes:")
+    logger.info(missing[missing > 0.3])
 
     output_path = get_abs_path(paths["dataset_consolidado"])
     df.to_parquet(output_path, index=False)
-    print(f"Dataset consolidado salvo em: {output_path}")
+    logger.info(f"Dataset consolidado salvo em: {output_path}")
 
 if __name__ == '__main__':
     consolidar_dados()

@@ -1,38 +1,38 @@
 import argparse
 import subprocess
-from src.log_config import logging
+from src.log_config import logger
 import mlflow
 
 
 def preprocess():
-    logging.info('Iniciando preprocess')
+    logger.info('Iniciando preprocess')
     subprocess.run(["python", "src/preprocess_data.py"], check=True)
-    logging.info('Finalizou preprocess')
+    logger.info('Finalizou preprocess')
 
 def consolidate():
-    logging.info('Iniciando consolidar_dados')
+    logger.info('Iniciando consolidar_dados')
     subprocess.run(["python", "src/consolidar_dados.py"], check=True)
-    logging.info('Finalizou consolidar_dados')
+    logger.info('Finalizou consolidar_dados')
 
 def define_target():
-    logging.info('Iniciando definir_target')
+    logger.info('Iniciando definir_target')
     subprocess.run(["python", "src/definir_target.py"], check=True)
-    logging.info('Finalizou definir_target')
+    logger.info('Finalizou definir_target')
 
 def feature_engineering():
-    logging.info('Iniciando feature_engineering')
+    logger.info('Iniciando feature_engineering')
     subprocess.run(["python", "src/feature_engineering.py"], check=True)
-    logging.info('Finalizou feature_engineering')
+    logger.info('Finalizou feature_engineering')
 
 def train_model():
-    logging.info('Iniciando train_model')
+    logger.info('Iniciando train_model')
     subprocess.run(["python", "src/train_model.py"], check=True)
-    logging.info('Finalizou train_model')
+    logger.info('Finalizou train_model')
 
 def tune_model():
-    logging.info('Iniciando tune_model')
+    logger.info('Iniciando tune_model')
     subprocess.run(["python", "src/tune_model.py"], check=True)
-    logging.info('Finalizou tune_model')
+    logger.info('Finalizou tune_model')
 
 
 def main(steps):
@@ -43,7 +43,7 @@ def main(steps):
 
     # Set up MLflow experiment
     mlflow.set_experiment(f"experiment_{steps[0]}") #_{current_datetime}")
-    # Enable system metrics logging
+    # Enable system metrics logger
     mlflow.enable_system_metrics_logging()
 
     if "preprocess" in steps:
@@ -71,6 +71,7 @@ if __name__ == "__main__":
             "define_target",
             "feature_engineering",
             "train_model",
+            #"tune",
         ],
     )
     args = parser.parse_args()

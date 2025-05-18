@@ -16,6 +16,7 @@ from sklearn.metrics import (
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from config import load_config, get_abs_path
+from log_config import logger
 from mlflow.models import infer_signature
 from datetime import datetime
 import pandas as pd
@@ -59,7 +60,7 @@ def main() -> None:
         if col != "target" and pd.api.types.is_numeric_dtype(df[col])
     ]
     X = df[features]
-    print(f"Features usadas no treino: {features}")
+    logger.info(f"Features usadas no treino: {features}")
 
     X_train, X_test, y_train, y_test = train_test_split(
         X,
@@ -109,7 +110,7 @@ def main() -> None:
         with mlflow.start_run(run_name=run_name) as run:
             log_system_info()
             
-            print(f"\nTreinando modelo {name}...")
+            logger.info(f"\nTreinando modelo {name}...")
             model.fit(X_train_scaled, y_train)
             y_pred = model.predict(X_test_scaled)
             signature = infer_signature(X_test_scaled, y_pred)
@@ -138,19 +139,19 @@ def main() -> None:
             
             results[name] = {"auc": auc, "f1": f1, "precision": prec, "recall": rec}
             results[name].update({ "run_id": run.info.run_id })
-            print(f"\nRun ID: {run.info.run_id}")
-            print(f"\nModelo: {name}")
-            print(
+            logger.info(f"\nRun ID: {run.info.run_id}")
+            logger.info(f"\nModelo: {name}")
+            logger.info(
                 f"AUC: {auc:.3f} | F1: {f1:.3f} | Precision: {prec:.3f} | Recall: {rec:.3f}"
             )
-            print(classification_report(y_test, y_pred))
+            logger.info(classification_report(y_test, y_pred))
 
     best_model_name = max(results, key=lambda k: results[k]["auc"])
     best_run_id = results[best_model_name]["run_id"]
     best_model = models[best_model_name]
 
     result = mlflow.register_model(f"runs:/{best_run_id}/{best_model_name}", f"{best_model_name}")
-    print(f"Modelo registrado: {result.name} (AUC={results[best_model_name]['auc']:.3f}, RunID: {best_run_id})")
+    logger.info(f"Modelo registrado: {result.name} (AUC={results[best_model_name]['auc']:.3f}, RunID: {best_run_id})")
 
     with open(paths["modelo_treinado"], "wb") as f:
         pickle.dump(
@@ -162,12 +163,12 @@ def main() -> None:
             },
             f,
         )
-    print(
+    logger.info(
         f"\nMelhor modelo salvo: {best_model_name} (AUC={results[best_model_name]['auc']:.3f})"
     )
-    print(f"Arquivo: {paths['modelo_treinado']}")
+    logger.info(f"Arquivo: {paths['modelo_treinado']}")
 
-    # Feature importance logging
+    # Feature importance logger
     with mlflow.start_run(run_id=best_run_id):
         if hasattr(best_model, 'feature_importances_'):
             importances = best_model.feature_importances_

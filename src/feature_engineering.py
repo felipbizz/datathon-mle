@@ -9,7 +9,7 @@ import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from nltk.corpus import stopwords
-from log_config import logging
+from log_config import logger
 from config import load_config, get_abs_path
 from typing import Any, List
 from tqdm import tqdm
@@ -23,13 +23,13 @@ def coluna_valida(df: pd.DataFrame, col: str) -> bool:
         return False
     missing = df[col].isnull().mean()
     if missing > 0.5:
-        logging.info(
+        logger.info(
             f'[SKIP] Coluna "{col}" com {missing:.0%} missing, feature não criada.'
         )
         return False
     vc = df[col].value_counts(normalize=True, dropna=True)
     if not vc.empty and vc.iloc[0] > 0.9:
-        logging.info(
+        logger.info(
             f'[SKIP] Coluna "{col}" com valor dominante ({vc.index[0]}) em {vc.iloc[0]:.0%}, feature não criada.'
         )
         return False
@@ -64,7 +64,7 @@ def conta_cursos(texto):
 
 class TextFeatureGenerator:
     def __init__(self):
-        logging.info("[Init] Carregando modelo de embeddings...")
+        logger.info("[Init] Carregando modelo de embeddings...")
         self.embedding_model = SentenceTransformer(
             "paraphrase-multilingual-MiniLM-L12-v2"
         )
@@ -80,7 +80,7 @@ class TextFeatureGenerator:
         return len(str(texto).split())
 
     def gerar_embeddings_agregados(self, textos: List[str], batch_size: int = 128) -> pd.DataFrame:
-        logging.info(f"[Embeddings] Iniciando geração para {len(textos)} textos...")
+        logger.info(f"[Embeddings] Iniciando geração para {len(textos)} textos...")
         
         embeddings = self.embedding_model.encode(
             textos,
@@ -90,7 +90,7 @@ class TextFeatureGenerator:
             normalize_embeddings=True
         )
         
-        logging.info("[Embeddings] Geração finalizada. Criando features agregadas...")
+        logger.info("[Embeddings] Geração finalizada. Criando features agregadas...")
         df_emb = pd.DataFrame({
             "emb_mean": embeddings.mean(axis=1),
             "emb_std": embeddings.std(axis=1),
@@ -103,17 +103,17 @@ class TextFeatureGenerator:
     def transform(self, df: pd.DataFrame, campos_texto: List[str]) -> pd.DataFrame:
         for campo in campos_texto:
             if campo in df.columns:
-                logging.info(f"[{campo}] Criando features de tamanho e palavras...")
+                logger.info(f"[{campo}] Criando features de tamanho e palavras...")
                 df[f"{campo}_nchar"] = df[campo].apply(self.tamanho_texto)
                 df[f"{campo}_nwords"] = df[campo].apply(self.n_palavras)
 
-                logging.info(f"[{campo}] Criando embeddings agregados...")
+                logger.info(f"[{campo}] Criando embeddings agregados...")
                 textos = df[campo].fillna("").astype(str).tolist()
                 df_emb = self.gerar_embeddings_agregados(textos)
                 df_emb.columns = [f"{campo}_{col}" for col in df_emb.columns]
 
                 df = pd.concat([df, df_emb], axis=1)
-                logging.info(f"[{campo}] Features de embeddings agregados adicionadas.")
+                logger.info(f"[{campo}] Features de embeddings agregados adicionadas.")
 
         return df
 
@@ -146,34 +146,25 @@ class TextFeatureGenerator:
             df["sim_titulo_vs_vaga"] = similarities
 
         return df
-
-
-def main() -> None:
-    config = load_config()
-    paths = config["paths"]
-    for k in paths:
-        paths[k] = get_abs_path(paths[k])
-    stop_words = set(stopwords.words("portuguese"))
-
-    df = pd.read_parquet(paths["dataset_modelagem"])
-
+    
+def cria_features(df):
     # 1. Nível acadêmico do candidato (one-hot encoding)
     if coluna_valida(df, "nivel_academico"):
         df = pd.get_dummies(
             df, columns=["nivel_academico"], prefix="nivel_acad", dummy_na=True
         )
-        logging.info("[OK] One-hot de nivel_academico criado.")
+        logger.info("[OK] One-hot de nivel_academico criado.")
     else:
-        logging.info("[SKIP] One-hot de nivel_academico não criado.")
+        logger.info("[SKIP] One-hot de nivel_academico não criado.")
 
     # 2. Tipo de contratação da vaga (one-hot encoding)
     if coluna_valida(df, "tipo_contratacao"):
         df = pd.get_dummies(
             df, columns=["tipo_contratacao"], prefix="tipo_contr", dummy_na=True
         )
-        logging.info("[OK] One-hot de tipo_contratacao criado.")
+        logger.info("[OK] One-hot de tipo_contratacao criado.")
     else:
-        logging.info("[SKIP] One-hot de tipo_contratacao não criado.")  
+        logger.info("[SKIP] One-hot de tipo_contratacao não criado.")  
 
     campos_texto = [
         "principais_atividades",
@@ -186,13 +177,26 @@ def main() -> None:
     df = feature_generator.transform(df, campos_texto)
 
     df = feature_generator.adicionar_similaridade_titulo_vaga(df)
+
+    return df
+
+
+def main() -> None:
+    config = load_config()
+    paths = config["paths"]
+    for k in paths:
+        paths[k] = get_abs_path(paths[k])
+
+    df = pd.read_parquet(paths["dataset_modelagem"])
+
+    df = cria_features(df)
     
     df = df.drop(columns=['titulo', 'comentario', 'titulo_vaga', 'prazo_contratacao','prioridade_vaga', 'nivel profissional', 'nivel_ingles',
                             'nivel_espanhol', 'areas_atuacao', 'principais_atividades','competencia_tecnicas_e_comportamentais', 'demais_observacoes',
                             'equipamentos_necessarios', 'habilidades_comportamentais_necessarias', 'valor_venda','valor_compra_1',] )
 
     df.to_parquet(paths["dataset_features"], index=False)
-    logging.info(f"Dataset com features salvos em {paths['dataset_features']}")
+    logger.info(f"Dataset com features salvos em {paths['dataset_features']}")
 
 
 if __name__ == "__main__":

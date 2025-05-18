@@ -1,4 +1,4 @@
-from log_config import logging
+from log_config import logger
 import pandas as pd
 import nltk
 from nltk.corpus import stopwords
@@ -116,7 +116,7 @@ def limpar_datas(valor):
         if valor in ("0000-00-00", "0000", "0"):
             return None
     try:
-        data = pd.to_datetime(valor, errors="coerce")
+        data = pd.to_datetime(valor, errors="coerce", dayfirst=True)
         if pd.isna(data):
             return None
         if data.year < 1930 or data.year > 2030:
@@ -161,6 +161,12 @@ def clean_data(
     if colunas_numeros:
         for col in colunas_numeros:
             df[col] = pd.to_numeric(df[col].apply(limpar_numeros), errors='coerce')
+
+    # precisa melhorar o preenchimento de valores ausentes
+    colunas_cat = df.select_dtypes(include="object").columns
+    for col in colunas_cat:
+        df[col] = df[col].fillna("desconhecido")
+        
     return df
 
 
@@ -178,7 +184,7 @@ def execute_preprocess():
         path=path_applicants, index_col="cod_applicant", cols_normalize=cols_applicants
     )
     df_applicants.to_parquet(get_abs_path(paths["applicants_bronze"]), index=False)
-    logging.info("df_applicants %s", df_applicants.shape)
+    logger.info("df_applicants %s", df_applicants.shape)
 
     # df_prospects
     path_prospects = get_abs_path(paths["prospects_json"])
@@ -186,7 +192,7 @@ def execute_preprocess():
         path=path_prospects, index_col="cod_vaga", explode_col="prospects"
     )
     df_prospects.to_parquet(get_abs_path(paths["prospects_bronze"]), index=False)
-    logging.info("df_prospects %s", df_prospects.shape)
+    logger.info("df_prospects %s", df_prospects.shape)
 
     # df_vagas
     path_vagas = get_abs_path(paths["vagas_json"])
@@ -195,9 +201,9 @@ def execute_preprocess():
         path=path_vagas, index_col="cod_vaga", cols_normalize=cols_vagas
     )
     df_vagas.to_parquet(get_abs_path(paths["vagas_bronze"]), index=False)
-    logging.info("df_vagas %s", df_vagas.shape)
+    logger.info("df_vagas %s", df_vagas.shape)
 
-    logging.info("# --- TRATANDO COLUNAS TABELA APPLICANTS ---")
+    logger.info("# --- TRATANDO COLUNAS TABELA APPLICANTS ---")
 
     colunas_texto_applicants = [
         "cv_pt",
@@ -218,7 +224,7 @@ def execute_preprocess():
     )
     df_applicants.to_parquet(get_abs_path(paths["applicants_silver"]), index=False)
 
-    logging.info("# --- TRATANDO COLUNAS TABELA VAGAS ---  ")
+    logger.info("# --- TRATANDO COLUNAS TABELA VAGAS ---  ")
     colunas_texto_vagas = [
         "titulo_vaga",
         "tipo_contratacao",
@@ -235,16 +241,19 @@ def execute_preprocess():
         "data_inicial",
         "data_final",
     ]
+    colunas_datas_prospects = [
+        "data_candidatura",
+    ]
 
     df_vagas = clean_data(df_vagas, colunas_texto_vagas, colunas_datas_vagas)
     df_vagas.to_parquet(get_abs_path(paths["vagas_silver"]), index=False)
 
-    logging.info("# --- TRATANDO COLUNAS TABELA PROSPECTS ---")
+    logger.info("# --- TRATANDO COLUNAS TABELA PROSPECTS ---")
 
     colunas_texto_prospects = ["titulo", "situacao_candidado", "comentario"]
-    df_prospects = clean_data(df_prospects, colunas_texto_prospects)
+    df_prospects = clean_data(df_prospects, colunas_texto_prospects, colunas_datas_prospects)
     df_prospects.to_parquet(get_abs_path(paths["prospects_silver"]), index=False)
-    logging.info("Data preprocessing completed.")
+    logger.info("Data preprocessing completed.")
 
 
 if __name__ == "__main__":
