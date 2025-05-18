@@ -4,7 +4,13 @@ Performs grid search with cross-validation and saves best parameters to config.
 """
 
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import make_scorer, roc_auc_score, f1_score, precision_score, recall_score
+from sklearn.metrics import (
+    make_scorer,
+    roc_auc_score,
+    f1_score,
+    precision_score,
+    recall_score,
+)
 import mlflow
 import yaml
 from datetime import datetime
@@ -18,57 +24,64 @@ import lightgbm as lgb
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
+
 def tune_models(X_train, y_train, config, cv=5):
     """Perform hyperparameter tuning for all models."""
-    
+
     param_grids = {
-        "RandomForest": {
+        'RandomForest': {
             'n_estimators': [100, 200, 300],
             'max_depth': [None, 10, 20, 30],
             'min_samples_split': [2, 5, 10],
-            'min_samples_leaf': [1, 2, 4]
+            'min_samples_leaf': [1, 2, 4],
         },
-        "LogisticRegression": {
+        'LogisticRegression': {
             'C': [0.001, 0.01, 0.1, 1, 10],
             'penalty': ['l1', 'l2'],
-            'solver': ['liblinear', 'saga']
+            'solver': ['liblinear', 'saga'],
         },
-        "XGBoost": {
+        'XGBoost': {
             'learning_rate': [0.01, 0.1],
             'max_depth': [3, 5, 7],
             'n_estimators': [100, 200],
             'subsample': [0.8, 0.9],
-            'colsample_bytree': [0.8, 0.9]
+            'colsample_bytree': [0.8, 0.9],
         },
-        "LightGBM": {
+        'LightGBM': {
             'learning_rate': [0.01, 0.1],
             'max_depth': [3, 5, 7],
             'n_estimators': [100, 200],
             'subsample': [0.8, 0.9],
-            'colsample_bytree': [0.8, 0.9]
-        }
+            'colsample_bytree': [0.8, 0.9],
+        },
     }
-    
+
     models = {
-        "RandomForest": RandomForestClassifier(random_state=config["model"]["random_state"]),
-        "LogisticRegression": LogisticRegression(random_state=config["model"]["random_state"]),
-        "XGBoost": xgb.XGBClassifier(random_state=config["model"]["random_state"]),
-        "LightGBM": lgb.LGBMClassifier(random_state=config["model"]["random_state"])
+        'RandomForest': RandomForestClassifier(
+            random_state=config['model']['random_state']
+        ),
+        'LogisticRegression': LogisticRegression(
+            random_state=config['model']['random_state']
+        ),
+        'XGBoost': xgb.XGBClassifier(random_state=config['model']['random_state']),
+        'LightGBM': lgb.LGBMClassifier(random_state=config['model']['random_state']),
     }
-    
+
     scoring = {
         'auc': make_scorer(roc_auc_score),
         'f1': make_scorer(f1_score),
         'precision': make_scorer(precision_score),
-        'recall': make_scorer(recall_score)
+        'recall': make_scorer(recall_score),
     }
-    
+
     best_params = {}
-    
+
     for name, model in models.items():
-        with mlflow.start_run(run_name=f'tuning_{name}_{datetime.now().strftime("%Y-%m-%d_%H_%M_%S")}'):
-            print(f"\nTuning {name}...")
-            
+        with mlflow.start_run(
+            run_name=f'tuning_{name}_{datetime.now().strftime("%Y-%m-%d_%H_%M_%S")}'
+        ):
+            print(f'\nTuning {name}...')
+
             grid_search = GridSearchCV(
                 estimator=model,
                 param_grid=param_grids[name],
@@ -76,60 +89,67 @@ def tune_models(X_train, y_train, config, cv=5):
                 scoring=scoring,
                 refit='auc',
                 n_jobs=-1,
-                verbose=2
+                verbose=2,
             )
-            
+
             grid_search.fit(X_train, y_train)
-            
+
             # Log results
             mlflow.log_params(grid_search.best_params_)
-            mlflow.log_metric("best_cv_score", grid_search.best_score_)
-            
+            mlflow.log_metric('best_cv_score', grid_search.best_score_)
+
             best_params[name] = grid_search.best_params_
-            
-            print(f"Best parameters for {name}:")
+
+            print(f'Best parameters for {name}:')
             print(grid_search.best_params_)
-            print(f"Best CV score: {grid_search.best_score_:.4f}")
-    
+            print(f'Best CV score: {grid_search.best_score_:.4f}')
+
     return best_params
+
 
 def main():
     config = load_config()
-    paths = config["paths"]
+    paths = config['paths']
     for k in paths:
         paths[k] = get_abs_path(paths[k])
-    
+
     # Load and prepare data
-    df = pd.read_parquet(paths["dataset_features"])
-    features = [col for col in df.columns if col != "target" and pd.api.types.is_numeric_dtype(df[col])]
-    
+    df = pd.read_parquet(paths['dataset_features'])
+    features = [
+        col
+        for col in df.columns
+        if col != 'target' and pd.api.types.is_numeric_dtype(df[col])
+    ]
+
     X = df[features]
-    y = df["target"]
-    
+    y = df['target']
+
     X_train, _, y_train, _ = train_test_split(
-        X, y,
-        test_size=config["model"]["test_size"],
-        random_state=config["model"]["random_state"],
-        stratify=y
+        X,
+        y,
+        test_size=config['model']['test_size'],
+        random_state=config['model']['random_state'],
+        stratify=y,
     )
-    
+
     # Preprocess
-    imputer = SimpleImputer(strategy="median")
+    imputer = SimpleImputer(strategy='median')
     scaler = StandardScaler()
     X_train_imp = imputer.fit_transform(X_train)
     X_train_scaled = scaler.fit_transform(X_train_imp)
-    
+
     # Tune models
     best_params = tune_models(X_train_scaled, y_train, config)
-    
-    # Update config with best parameters
-    config["model"]["tuned_params"] = best_params
-    
-    # Save updated config
-    with open("config.yaml", "w") as f:
-        yaml.dump(config, f)
-    
-    print("\nBest parameters saved to config.yaml")
 
-if __name__ == "__main__":
+    # Update config with best parameters
+    config['model']['tuned_params'] = best_params
+
+    # Save updated config
+    with open('config.yaml', 'w') as f:
+        yaml.dump(config, f)
+
+    print('\nBest parameters saved to config.yaml')
+
+
+if __name__ == '__main__':
     main()

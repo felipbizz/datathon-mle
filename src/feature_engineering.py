@@ -4,18 +4,13 @@ Loads all paths and parameters from config.yaml for reproducibility.
 """
 
 import pandas as pd
-from datetime import datetime
-import re
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cluster import KMeans
-from nltk.corpus import stopwords
 from log_config import logger
 from config import load_config, get_abs_path
 from typing import Any, List
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer, util
 from rapidfuzz import fuzz
-import numpy as np
+
 
 def coluna_valida(df: pd.DataFrame, col: str) -> bool:
     """Check if a column is valid for feature creation."""
@@ -62,11 +57,12 @@ def conta_cursos(texto):
     palavras = texto.lower().split()
     return sum(1 for palavra in palavras if palavra == 'curso')
 
+
 class TextFeatureGenerator:
     def __init__(self):
-        logger.info("[Init] Carregando modelo de embeddings...")
+        logger.info('[Init] Carregando modelo de embeddings...')
         self.embedding_model = SentenceTransformer(
-            "paraphrase-multilingual-MiniLM-L12-v2"
+            'paraphrase-multilingual-MiniLM-L12-v2'
         )
 
     def tamanho_texto(self, texto: Any) -> int:
@@ -79,98 +75,109 @@ class TextFeatureGenerator:
             return 0
         return len(str(texto).split())
 
-    def gerar_embeddings_agregados(self, textos: List[str], batch_size: int = 128) -> pd.DataFrame:
-        logger.info(f"[Embeddings] Iniciando geração para {len(textos)} textos...")
-        
+    def gerar_embeddings_agregados(
+        self, textos: List[str], batch_size: int = 128
+    ) -> pd.DataFrame:
+        logger.info(f'[Embeddings] Iniciando geração para {len(textos)} textos...')
+
         embeddings = self.embedding_model.encode(
             textos,
             batch_size=batch_size,
             show_progress_bar=True,
             convert_to_numpy=True,
-            normalize_embeddings=True
+            normalize_embeddings=True,
         )
-        
-        logger.info("[Embeddings] Geração finalizada. Criando features agregadas...")
-        df_emb = pd.DataFrame({
-            "emb_mean": embeddings.mean(axis=1),
-            "emb_std": embeddings.std(axis=1),
-            "emb_min": embeddings.min(axis=1),
-            "emb_max": embeddings.max(axis=1),
-        })
-        
+
+        logger.info('[Embeddings] Geração finalizada. Criando features agregadas...')
+        df_emb = pd.DataFrame(
+            {
+                'emb_mean': embeddings.mean(axis=1),
+                'emb_std': embeddings.std(axis=1),
+                'emb_min': embeddings.min(axis=1),
+                'emb_max': embeddings.max(axis=1),
+            }
+        )
+
         return df_emb
 
     def transform(self, df: pd.DataFrame, campos_texto: List[str]) -> pd.DataFrame:
         for campo in campos_texto:
             if campo in df.columns:
-                logger.info(f"[{campo}] Criando features de tamanho e palavras...")
-                df[f"{campo}_nchar"] = df[campo].apply(self.tamanho_texto)
-                df[f"{campo}_nwords"] = df[campo].apply(self.n_palavras)
+                logger.info(f'[{campo}] Criando features de tamanho e palavras...')
+                df[f'{campo}_nchar'] = df[campo].apply(self.tamanho_texto)
+                df[f'{campo}_nwords'] = df[campo].apply(self.n_palavras)
 
-                logger.info(f"[{campo}] Criando embeddings agregados...")
-                textos = df[campo].fillna("").astype(str).tolist()
+                logger.info(f'[{campo}] Criando embeddings agregados...')
+                textos = df[campo].fillna('').astype(str).tolist()
                 df_emb = self.gerar_embeddings_agregados(textos)
-                df_emb.columns = [f"{campo}_{col}" for col in df_emb.columns]
+                df_emb.columns = [f'{campo}_{col}' for col in df_emb.columns]
 
                 df = pd.concat([df, df_emb], axis=1)
-                logger.info(f"[{campo}] Features de embeddings agregados adicionadas.")
+                logger.info(f'[{campo}] Features de embeddings agregados adicionadas.')
 
         return df
 
     def gerar_embeddings(self, textos: pd.Series):
-        textos = textos.fillna("").astype(str).tolist()
-        return self.embedding_model.encode(textos, convert_to_tensor=True, normalize_embeddings=True)
+        textos = textos.fillna('').astype(str).tolist()
+        return self.embedding_model.encode(
+            textos, convert_to_tensor=True, normalize_embeddings=True
+        )
 
     def similaridade_string(self, t1, t2):
         if pd.isnull(t1) or pd.isnull(t2):
             return 0
         return fuzz.token_sort_ratio(str(t1), str(t2)) / 100
 
-    def adicionar_similaridade_titulo_vaga(self, df: pd.DataFrame, col1="titulo", col2="titulo_vaga", batch_size=1000) -> pd.DataFrame:
+    def adicionar_similaridade_titulo_vaga(
+        self, df: pd.DataFrame, col1='titulo', col2='titulo_vaga', batch_size=1000
+    ) -> pd.DataFrame:
         if col1 in df.columns and col2 in df.columns:
             # String similarity calculation remains the same
-            tqdm.pandas(desc="[String Similarity]")
-            df["titulo_sim_ratio"] = df.progress_apply(lambda row: self.similaridade_string(row[col1], row[col2]), axis=1)
+            tqdm.pandas(desc='[String Similarity]')
+            df['titulo_sim_ratio'] = df.progress_apply(
+                lambda row: self.similaridade_string(row[col1], row[col2]), axis=1
+            )
 
-            tqdm.write("[Embeddings] Gerando embeddings dos títulos...")
+            tqdm.write('[Embeddings] Gerando embeddings dos títulos...')
             similarities = []
-            
-            for i in tqdm(range(0, len(df), batch_size), desc="Processing batches"):
-                batch_df = df.iloc[i:i+batch_size]
-                emb1 = self.gerar_embeddings(batch_df[col1].fillna("").astype(str))
-                emb2 = self.gerar_embeddings(batch_df[col2].fillna("").astype(str))
-                
+
+            for i in tqdm(range(0, len(df), batch_size), desc='Processing batches'):
+                batch_df = df.iloc[i : i + batch_size]
+                emb1 = self.gerar_embeddings(batch_df[col1].fillna('').astype(str))
+                emb2 = self.gerar_embeddings(batch_df[col2].fillna('').astype(str))
+
                 batch_similarities = util.cos_sim(emb1, emb2).diagonal().cpu().numpy()
                 similarities.extend(batch_similarities)
-                
-            df["sim_titulo_vs_vaga"] = similarities
+
+            df['sim_titulo_vs_vaga'] = similarities
 
         return df
-    
+
+
 def cria_features(df):
     # 1. Nível acadêmico do candidato (one-hot encoding)
-    if coluna_valida(df, "nivel_academico"):
+    if coluna_valida(df, 'nivel_academico'):
         df = pd.get_dummies(
-            df, columns=["nivel_academico"], prefix="nivel_acad", dummy_na=True
+            df, columns=['nivel_academico'], prefix='nivel_acad', dummy_na=True
         )
-        logger.info("[OK] One-hot de nivel_academico criado.")
+        logger.info('[OK] One-hot de nivel_academico criado.')
     else:
-        logger.info("[SKIP] One-hot de nivel_academico não criado.")
+        logger.info('[SKIP] One-hot de nivel_academico não criado.')
 
     # 2. Tipo de contratação da vaga (one-hot encoding)
-    if coluna_valida(df, "tipo_contratacao"):
+    if coluna_valida(df, 'tipo_contratacao'):
         df = pd.get_dummies(
-            df, columns=["tipo_contratacao"], prefix="tipo_contr", dummy_na=True
+            df, columns=['tipo_contratacao'], prefix='tipo_contr', dummy_na=True
         )
-        logger.info("[OK] One-hot de tipo_contratacao criado.")
+        logger.info('[OK] One-hot de tipo_contratacao criado.')
     else:
-        logger.info("[SKIP] One-hot de tipo_contratacao não criado.")  
+        logger.info('[SKIP] One-hot de tipo_contratacao não criado.')
 
     campos_texto = [
-        "principais_atividades",
-        "competencia_tecnicas_e_comportamentais",
-        "demais_observacoes",
-        "comentario",
+        'principais_atividades',
+        'competencia_tecnicas_e_comportamentais',
+        'demais_observacoes',
+        'comentario',
     ]
 
     feature_generator = TextFeatureGenerator()
@@ -183,21 +190,38 @@ def cria_features(df):
 
 def main() -> None:
     config = load_config()
-    paths = config["paths"]
+    paths = config['paths']
     for k in paths:
         paths[k] = get_abs_path(paths[k])
 
-    df = pd.read_parquet(paths["dataset_modelagem"])
+    df = pd.read_parquet(paths['dataset_modelagem'])
 
     df = cria_features(df)
-    
-    df = df.drop(columns=['titulo', 'comentario', 'titulo_vaga', 'prazo_contratacao','prioridade_vaga', 'nivel profissional', 'nivel_ingles',
-                            'nivel_espanhol', 'areas_atuacao', 'principais_atividades','competencia_tecnicas_e_comportamentais', 'demais_observacoes',
-                            'equipamentos_necessarios', 'habilidades_comportamentais_necessarias', 'valor_venda','valor_compra_1',] )
 
-    df.to_parquet(paths["dataset_features"], index=False)
-    logger.info(f"Dataset com features salvos em {paths['dataset_features']}")
+    df = df.drop(
+        columns=[
+            'titulo',
+            'comentario',
+            'titulo_vaga',
+            'prazo_contratacao',
+            'prioridade_vaga',
+            'nivel profissional',
+            'nivel_ingles',
+            'nivel_espanhol',
+            'areas_atuacao',
+            'principais_atividades',
+            'competencia_tecnicas_e_comportamentais',
+            'demais_observacoes',
+            'equipamentos_necessarios',
+            'habilidades_comportamentais_necessarias',
+            'valor_venda',
+            'valor_compra_1',
+        ]
+    )
+
+    df.to_parquet(paths['dataset_features'], index=False)
+    logger.info(f'Dataset com features salvos em {paths["dataset_features"]}')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

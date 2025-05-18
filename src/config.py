@@ -1,7 +1,7 @@
 import yaml
 from pathlib import Path
 
-CONFIG_PATH = Path(__file__).parent.parent / "config.yaml"
+CONFIG_PATH = Path(__file__).parent.parent / 'config.yaml'
 
 
 def get_abs_path(rel_path):
@@ -11,5 +11,5 @@ def get_abs_path(rel_path):
 
 
 def load_config(config_path=CONFIG_PATH):
-    with open(config_path, "r") as f:
+    with open(config_path, 'r') as f:
         return yaml.safe_load(f)

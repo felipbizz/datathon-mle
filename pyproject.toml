@@ -60,3 +60,6 @@ addopts = "-ra -q --cov=src"
 testpaths = [
     "tests",
 ]
+
+[tool.ruff.format]
+quote-style = "single"

@@ -6,72 +6,75 @@ import mlflow
 
 def preprocess():
     logger.info('Iniciando preprocess')
-    subprocess.run(["python", "src/preprocess_data.py"], check=True)
+    subprocess.run(['python', 'src/preprocess_data.py'], check=True)
     logger.info('Finalizou preprocess')
+
 
 def consolidate():
     logger.info('Iniciando consolidar_dados')
-    subprocess.run(["python", "src/consolidar_dados.py"], check=True)
+    subprocess.run(['python', 'src/consolidar_dados.py'], check=True)
     logger.info('Finalizou consolidar_dados')
+
 
 def define_target():
     logger.info('Iniciando definir_target')
-    subprocess.run(["python", "src/definir_target.py"], check=True)
+    subprocess.run(['python', 'src/definir_target.py'], check=True)
     logger.info('Finalizou definir_target')
+
 
 def feature_engineering():
     logger.info('Iniciando feature_engineering')
-    subprocess.run(["python", "src/feature_engineering.py"], check=True)
+    subprocess.run(['python', 'src/feature_engineering.py'], check=True)
     logger.info('Finalizou feature_engineering')
+
 
 def train_model():
     logger.info('Iniciando train_model')
-    subprocess.run(["python", "src/train_model.py"], check=True)
+    subprocess.run(['python', 'src/train_model.py'], check=True)
     logger.info('Finalizou train_model')
+
 
 def tune_model():
     logger.info('Iniciando tune_model')
-    subprocess.run(["python", "src/tune_model.py"], check=True)
+    subprocess.run(['python', 'src/tune_model.py'], check=True)
     logger.info('Finalizou tune_model')
 
 
 def main(steps):
-
     # Set up MLflow tracking URI
-    mlflow.set_tracking_uri("http://127.0.0.1:5000")
-
+    mlflow.set_tracking_uri('http://127.0.0.1:5000')
 
     # Set up MLflow experiment
-    mlflow.set_experiment(f"experiment_{steps[0]}") #_{current_datetime}")
+    mlflow.set_experiment(f'experiment_{steps[0]}')  # _{current_datetime}")
     # Enable system metrics logger
     mlflow.enable_system_metrics_logging()
 
-    if "preprocess" in steps:
+    if 'preprocess' in steps:
         preprocess()
-    if "consolidate" in steps:
+    if 'consolidate' in steps:
         consolidate()
-    if "define_target" in steps:
+    if 'define_target' in steps:
         define_target()
-    if "feature_engineering" in steps:
+    if 'feature_engineering' in steps:
         feature_engineering()
-    if "train_model" in steps:
+    if 'train_model' in steps:
         train_model()
-    if "tune" in steps:
+    if 'tune' in steps:
         tune_model()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--steps",
-        nargs="+",
+        '--steps',
+        nargs='+',
         default=[
-            "preprocess",
-            "consolidate",
-            "define_target",
-            "feature_engineering",
-            "train_model",
-            #"tune",
+            'preprocess',
+            'consolidate',
+            'define_target',
+            'feature_engineering',
+            'train_model',
+            # "tune",
         ],
     )
     args = parser.parse_args()

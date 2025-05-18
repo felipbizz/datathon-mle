@@ -4,6 +4,7 @@ import argparse
 from enum import Enum
 from dotenv import load_dotenv
 
+
 class SQL_STATEMENTS(Enum):
     clear_experiment_tags = """DELETE FROM experiment_tags WHERE experiment_id IN (
         SELECT experiment_id FROM experiments where lifecycle_stage='deleted'
@@ -33,7 +34,8 @@ class SQL_STATEMENTS(Enum):
 
     clear_experiments = "DELETE FROM experiments where lifecycle_stage='deleted';"
 
-    list_experiments = "SELECT name, lifecycle_stage FROM experiments"
+    list_experiments = 'SELECT name, lifecycle_stage FROM experiments'
+
 
 def purge_experiments():
     # Clear the experiment_tags table
@@ -54,9 +56,9 @@ def purge_experiments():
     # Clear the experiments table
     cursor.execute(SQL_STATEMENTS.clear_experiments.value)
 
-
     # Commit the changes and close the connection
     conn.commit()
+
 
 def list_experiments():
     # Execute the SQL statement to get all experiment names
@@ -69,23 +71,23 @@ def list_experiments():
     for row in rows:
         print(row)
 
-def main(action):
 
-    if "list_experiments" in action:
+def main(action):
+    if 'list_experiments' in action:
         list_experiments()
-    if "purge_experiments" in action:
+    if 'purge_experiments' in action:
         purge_experiments()
 
-if __name__ == "__main__":
 
-    if os.path.exists(".env"):
-        print("Arquivo .env encontrado, carregando variáveis.")
+if __name__ == '__main__':
+    if os.path.exists('.env'):
+        print('Arquivo .env encontrado, carregando variáveis.')
         # Load environment variables from .env file
         load_dotenv()
     else:
-        print("Usando variáveis de ambiente do sistema, ou valores padrão.")
+        print('Usando variáveis de ambiente do sistema, ou valores padrão.')
 
-    db_path = os.getenv("DB_PATH", 'infra/volumes/mlflow/sqlite/mlflow.db')
+    db_path = os.getenv('DB_PATH', 'infra/volumes/mlflow/sqlite/mlflow.db')
 
     # Connect to your SQLite database
     conn = sqlite3.connect(db_path)
@@ -93,11 +95,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--action",
-        nargs="+",
+        '--action',
+        nargs='+',
         default=[
-            "list_experiments",
-            "purge_experiments",
+            'list_experiments',
+            'purge_experiments',
         ],
     )
     args = parser.parse_args()
