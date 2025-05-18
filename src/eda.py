@@ -1,4 +1,4 @@
-from log_config import logging
+from log_config import logger
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -26,30 +26,30 @@ plt.close()
 
 def missing_report(df, name):
     na = df.isnull().mean().sort_values(ascending=False)
-    logging.info(f"\nValores ausentes em {name}:")
-    logging.info(na[na > 0])
+    logger.info(f"\nValores ausentes em {name}:")
+    logger.info(na[na > 0])
 
 
 missing_report(applicants, "applicants")
 missing_report(vagas, "vagas")
 missing_report(prospects, "prospects")
 
-logging.info("\nEstatísticas descritivas - applicants:")
-logging.info(
+logger.info("\nEstatísticas descritivas - applicants:")
+logger.info(
     applicants.describe(
         include="all",
     )
 )
 
-logging.info("\nEstatísticas descritivas - vagas:")
-logging.info(
+logger.info("\nEstatísticas descritivas - vagas:")
+logger.info(
     vagas.describe(
         include="all",
     )
 )
 
-logging.info("\nEstatísticas descritivas - prospects:")
-logging.info(
+logger.info("\nEstatísticas descritivas - prospects:")
+logger.info(
     prospects.describe(
         include="all",
     )
@@ -94,7 +94,7 @@ if "area_atuacao" in applicants.columns:
         df_merged_area["area_atuacao"], df_merged_area["situacao_candidado"]
     )
     tab_area.to_csv("tabela_area_atuacao_vs_situacao.csv")
-    logging.info(
+    logger.info(
         "\nTabela de contingência área de atuação vs. situação do candidato salva."
     )
 
@@ -103,8 +103,8 @@ if "nivel_academico" in df_merged.columns:
         df_merged["nivel_academico"], df_merged["situacao_candidado"]
     )
     tab_nivel.to_csv("tabela_nivel_academico_vs_situacao.csv")
-    logging.info(
+    logger.info(
         "Tabela de contingência nível acadêmico vs. situação do candidato salva."
     )
 
-logging.info("\nEDA concluída. Gráficos salvos no diretório atual.")
+logger.info("\nEDA concluída. Gráficos salvos no diretório atual.")
