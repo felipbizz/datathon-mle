@@ -6,6 +6,8 @@ import re
 from unidecode import unidecode
 from config import load_config, get_abs_path
 import numpy as np
+from pathlib import Path
+
 
 nltk.download("stopwords")
 stop_words = set(stopwords.words("portuguese"))
@@ -90,17 +92,17 @@ def limpar_numeros(valor):
         if isinstance(valor, str):
             valor = valor.strip()
             # Case 1: US format (1,234.56)
-            if ',' in valor and '.' in valor:
-                if valor.find(',') < valor.find('.'):
-                    return float(valor.replace(',', ''))
+            if "," in valor and "." in valor:
+                if valor.find(",") < valor.find("."):
+                    return float(valor.replace(",", ""))
             # Case 2: Brazilian format (2.000,00)
-            if '.' in valor and ',' in valor:
-                if valor.find('.') < valor.find(','):
-                    cleaned = valor.replace('.', '').replace(',', '.')
+            if "." in valor and "," in valor:
+                if valor.find(".") < valor.find(","):
+                    cleaned = valor.replace(".", "").replace(",", ".")
                     return float(cleaned)
             # Case 3: Simple comma as decimal
-            if ',' in valor and '.' not in valor:
-                return float(valor.replace(',', '.'))
+            if "," in valor and "." not in valor:
+                return float(valor.replace(",", "."))
             # Case 4: Plain number
             return float(valor)
         return np.nan
@@ -148,7 +150,7 @@ def clean_data(
     df = df.copy()  # Create a copy to avoid modifying original
     df = remove_colunas_dominantes(df)
     df = remove_colunas_irrelevantes(df)
-    
+
     if colunas_texto:
         for col in colunas_texto:
             df[col] = df[col].apply(limpar_texto)
@@ -157,10 +159,10 @@ def clean_data(
             df[col] = df[col].apply(limpar_datas)
     if colunas_anos:
         for col in colunas_anos:
-            df[col] = pd.to_numeric(df[col].apply(limpar_anos), errors='coerce')
+            df[col] = pd.to_numeric(df[col].apply(limpar_anos), errors="coerce")
     if colunas_numeros:
         for col in colunas_numeros:
-            df[col] = pd.to_numeric(df[col].apply(limpar_numeros), errors='coerce')
+            df[col] = pd.to_numeric(df[col].apply(limpar_numeros), errors="coerce")
     return df
 
 
@@ -177,7 +179,9 @@ def execute_preprocess():
     df_applicants = convert_json_to_df(
         path=path_applicants, index_col="cod_applicant", cols_normalize=cols_applicants
     )
-    df_applicants.to_parquet(get_abs_path(paths["applicants_bronze"]), index=False)
+    destination_path = Path(get_abs_path(paths["applicants_bronze"]))
+    destination_path.parent.mkdir(exist_ok=True, parents=True)  # CRIANDO PASTA BRONZE
+    df_applicants.to_parquet(destination_path, index=False)
     logging.info("df_applicants %s", df_applicants.shape)
 
     # df_prospects
@@ -216,7 +220,9 @@ def execute_preprocess():
         ["ano_conclusao"],
         ["remuneracao"],
     )
-    df_applicants.to_parquet(get_abs_path(paths["applicants_silver"]), index=False)
+    destination_path = Path(get_abs_path(paths["applicants_silver"]))
+    destination_path.parent.mkdir(exist_ok=True, parents=True)  # CRIANDO PASTA SILVER
+    df_applicants.to_parquet(destination_path, index=False)
 
     logging.info("# --- TRATANDO COLUNAS TABELA VAGAS ---  ")
     colunas_texto_vagas = [
