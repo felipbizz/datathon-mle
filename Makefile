@@ -61,11 +61,6 @@ list_experiments: ## Lista os experimentos do MLflow
 	@python src/db_mgmt.py --action list_experiments
 	@echo "Experiments listed."
 
-purge_registered_models: ## Limpa o registro de modelos
-	@echo "Removendo modelos registrados..."
-	@python main.py --steps purge_registered_models
-	@echo "Todos os modelos removidos."
-
 list_registered_models: ## Lista os modelos registrados
 	@echo "$(BLUE)Listando modelos registrados...$(NC)"
 	@python main.py --steps list_registered_models

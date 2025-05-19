@@ -1,10 +1,11 @@
 import pickle
 import bentoml
 import os
-from config import load_config
-from mle_utils.logger import set_log
+from mle_datathon.logger import set_log
+from mle_datathon.utils import load_config
 
-config = load_config()
+local_path = os.getcwd()
+config = load_config(local_path)
 paths = config["paths"]
 logger = set_log("save_model")
 

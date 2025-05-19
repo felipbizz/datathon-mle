@@ -1,50 +1,16 @@
 import argparse
-import subprocess
-from mle_datathon.logger import set_log
-from mle_datathon.model import train, tune
-from mle_datathon import ModelRegister
-# from mle_datathon.train_model import train
+import os
+from mle_datathon.utils import set_log
+from mle_datathon.model import train, tune, ModelRegistry
+from mle_datathon.data_processing import consolidar_dados, execute_preprocess, feature_engineering, define_target
+
 
 import mlflow
-from mlflow.tracking import MlflowClient
 
-
-client = MlflowClient("http://127.0.0.1:5000")
+tracking_uri = os.getenv("MLFLOW_TRACKING_URI","http://127.0.0.1:5000")
 
 logger = set_log("main")
-mr = ModelRegister(client=client)
-
-
-def preprocess():
-    logger.info('Iniciando preprocess')
-    subprocess.run(["python", "src/preprocess_data.py"], check=True)
-    logger.info('Finalizou preprocess')
-
-def consolidate():
-    logger.info('Iniciando consolidar_dados')
-    subprocess.run(["python", "src/consolidar_dados.py"], check=True)
-    logger.info('Finalizou consolidar_dados')
-
-def define_target():
-    logger.info('Iniciando definir_target')
-    subprocess.run(["python", "src/definir_target.py"], check=True)
-    logger.info('Finalizou definir_target')
-
-def feature_engineering():
-    logger.info('Iniciando feature_engineering')
-    subprocess.run(["python", "src/feature_engineering.py"], check=True)
-    logger.info('Finalizou feature_engineering')
-
-def train_model():
-    logger.info('Iniciando train_model')
-    # subprocess.run(["python", "src/train_model.py"], check=True)
-    train()
-    logger.info('Finalizou train_model')
-
-def tune_model():
-    logger.info('Iniciando tune_model')
-    tune()
-    logger.info('Finalizou tune_model')
+mr = ModelRegistry(tracking_uri)
 
 def list_registered_models():
     logger.info(f'Modelos Registrados:\n{mr.list_registered_models()}')
@@ -52,37 +18,57 @@ def list_registered_models():
 def purge_registered_models():
     mr.purge_registered_models()
     logger.info('Modelos registrados removidos com sucesso!')
-    
 
+def run_steps(steps):
+    """
+    Executa os passos especificados no pipeline.
+    """
+
+    if "full_pipeline" in steps:
+        logger.info("Iniciando pipeline completo")
+        execute_preprocess()
+        consolidar_dados()
+        define_target()
+        feature_engineering()
+        train()
+        return
+
+    if "preprocess" in steps:
+        logger.info("Iniciando preprocessamento")
+        execute_preprocess()
+    if "consolidate" in steps:
+        logger.info("Iniciando consolidação de dados")
+        consolidar_dados()
+    if "define_target" in steps:
+        logger.info("Iniciando definição de target")
+        define_target()
+    if "feature_engineering" in steps:
+        logger.info("Iniciando engenharia de features")
+        feature_engineering()
+    if "train_model" in steps:
+        logger.info("Iniciando treinamento do modelo")
+        train()
+    if "tune" in steps:
+        logger.info("Iniciando ajuste do modelo")
+        tune()
+    if "list_registered_models" in steps:
+        list_registered_models()
+    
 
 def main(steps):
 
     # Set up MLflow tracking URI
-    mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    mlflow.set_tracking_uri(tracking_uri)
 
+    experiment_name = f"experiment_{steps[0]}"
+    logger.info(f"Iniciando experimento: {experiment_name}")
 
     # Set up MLflow experiment
-    mlflow.set_experiment(f"experiment_{steps[0]}") #_{current_datetime}")
+    mlflow.set_experiment(experiment_name) 
     # Enable system metrics logging
     mlflow.enable_system_metrics_logging()
 
-    if "preprocess" in steps:
-        preprocess()
-    if "consolidate" in steps:
-        consolidate()
-    if "define_target" in steps:
-        define_target()
-    if "feature_engineering" in steps:
-        feature_engineering()
-    if "train_model" in steps:
-        train_model()
-    if "tune" in steps:
-        tune_model()
-    if "list_registered_models" in steps:
-        list_registered_models()
-    if "purge_registered_models" in steps:
-        purge_registered_models()
-
+    run_steps(steps)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -90,11 +76,7 @@ if __name__ == "__main__":
         "--steps",
         nargs="+",
         default=[
-            "preprocess",
-            "consolidate",
-            "define_target",
-            "feature_engineering",
-            "train_model",
+            "full_pipeline",
         ],
     )
     args = parser.parse_args()

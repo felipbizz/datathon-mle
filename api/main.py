@@ -2,9 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import make_asgi_app
 
-
-from mle_utils.api_settings import detect_routers
-from mle_utils.logger import set_log
+from mle_datathon.api_settings import detect_routers
+from mle_datathon.utils import set_log
 
 logger = set_log("api", level=10)
 logger.info("---------------------------------------------------------------------------------------------------")

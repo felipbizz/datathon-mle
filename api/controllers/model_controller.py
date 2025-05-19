@@ -1,13 +1,17 @@
 from fastapi import APIRouter, Body
 from typing import Annotated, Any
-from mle_utils.logger import set_log
+from mle_datathon.utils import set_log
+from mle_datathon.model import ModelRegistry
+import numpy as np
 
 import os
 
 from prometheus_client import Summary, Counter
 
-logger = set_log("model_controller", level=10)
+tracking_uri = os.getenv("MLFLOW_TRACKING_URI","http://127.0.0.1:5000")
+mr = ModelRegistry(tracking_uri=tracking_uri)
 
+logger = set_log("model_controller", level=10)
 router = APIRouter(prefix="/api/v1/model", tags=["Endpoints do Modelo"])
 
 # Define Prometheus metrics
@@ -44,37 +48,21 @@ def list_models():
     )
     logger.info("Listando modelos disponíveis para predição.")
 
-    path = "ml_models"
-
-    logger.info(f"Obtendo lista de arquivos em {path}")
-    model_list = os.listdir(path)
+    model_list = mr.list_registered_models()
 
     logger.debug(f"Retornando a lista de arquivos existentes: {model_list}")
 
     return model_list
 
 
-@router.get("/tune")
-@TUNE_REQUEST_TIME.time()
-def tune():
-    ## TBD
-
-    return 
-
-
-@router.post("/train")
-@TRAIN_REQUEST_TIME.time()
-def train(best_config: Annotated[dict | None, Body()]) -> str:
-    ## TBD
-    return 
-
-
 @router.post("/predict")
 @PREDICT_REQUEST_TIME.time()
-def predict(model_file: Annotated[str | None, Body()], stock_option: str = "VALE3.SA"):
+def predict(model_name: Annotated[str | None, Body()], model_version: Annotated[int | None, Body()], data: Annotated[list | None, Body()]):
+    
     logger.info(
         "---------------------------------------------------------------------------------------------------"
     )
-    logger.info(f"Iniciando previsão utilizando o modelo {model_file}")
+    logger.info(f"Iniciando previsão utilizando o modelo {model_name} versão {model_version}")
     PREDICT_COUNT.inc()
-    return {"message": "return predicion : TBD"}
+
+    return mr.predict(model_name=model_name, version=model_version,data=data).tolist()

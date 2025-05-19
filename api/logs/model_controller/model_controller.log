@@ -2,3 +2,69 @@
 2025-05-16 13:45:46,718 - model_controller - INFO - Iniciando previsão utilizando o modelo string
 2025-05-18 10:26:08,612 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
 2025-05-18 10:26:08,613 - model_controller - INFO - Iniciando previsão utilizando o modelo string
+2025-05-18 19:37:42,877 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 19:37:42,877 - model_controller - INFO - Listando modelos disponíveis para predição.
+2025-05-18 19:40:38,336 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 19:40:38,337 - model_controller - INFO - Listando modelos disponíveis para predição.
+2025-05-18 19:40:38,358 - model_controller - DEBUG - Retornando a lista de arquivos existentes: {'models': [{'name': 'RandomForest', 'version': '15', 'status': 'None', 'description': '', 'run_id': '149f0a9ddae8441abfc597ecd304b15e', 'creation_time': 1747354056285, 'last_updated_time': 1747606425820, 'tags': {}}]}
+2025-05-18 19:44:55,343 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 19:44:55,343 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:14:49,815 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:14:49,815 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:15:15,571 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:15:15,571 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:16:04,816 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:16:04,817 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:16:46,712 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:16:46,713 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:17:11,213 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:17:11,213 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:22:41,228 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:22:41,229 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:25:32,853 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:25:32,853 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:27:58,408 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:27:58,408 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:28:56,437 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:28:56,437 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:29:17,890 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:29:17,890 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:31:03,653 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:31:03,653 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:32:22,227 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:32:22,227 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:32:34,952 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:32:34,952 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:45:52,814 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:45:52,815 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:47:40,390 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:47:40,390 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:51:48,214 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:51:48,214 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:56:10,579 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:56:10,580 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 20:59:04,429 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 20:59:04,429 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 21:00:43,688 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 21:00:43,688 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 21:01:57,534 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 21:01:57,534 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 21:11:22,729 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 21:11:22,730 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 21:14:43,800 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 21:14:43,800 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 21:15:39,621 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 21:15:39,621 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 21:16:47,208 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 21:16:47,208 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 21:18:53,440 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 21:18:53,441 - model_controller - INFO - Listando modelos disponíveis para predição.
+2025-05-18 21:18:53,465 - model_controller - DEBUG - Retornando a lista de arquivos existentes: {'models': [{'name': 'RandomForest', 'version': '15', 'status': 'None', 'description': '', 'run_id': '149f0a9ddae8441abfc597ecd304b15e', 'creation_time': 1747354056285, 'last_updated_time': 1747606425820, 'tags': {}}]}
+2025-05-18 21:21:43,531 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 21:21:43,532 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 21:23:19,006 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 21:23:19,006 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 21:25:04,564 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 21:25:04,564 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
+2025-05-18 21:50:21,224 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-18 21:50:21,224 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 16

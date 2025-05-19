@@ -6,5 +6,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.115.12",
+    "mlflow>=2.22.0",
     "prometheus-client>=0.21.1",
+    "psutil>=7.0.0",
+    "xgboost>=3.0.0",
 ]
