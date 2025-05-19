@@ -21,6 +21,11 @@ paths:
   feature_importance_lgm: "Datathon Decision/4_gold/feature_importance_lgb.csv"
   feature_importance_lr: "Datathon Decision/4_gold/feature_importance_lr.csv"
 
+  matriz_vaga_candidato: "Datathon Decision/2_bronze/matriz_vaga_candidato.parquet"
+  matriz_recomendacao_vaga_candidato: "Datathon Decision/4_gold/matriz_recomendacao_vaga_candidato.parquet"
+  logger_sink: "./"
+  torchrec_resources: "resources/torchrec/"
+
 # Model parameters
 model:
   test_size: 0.2
