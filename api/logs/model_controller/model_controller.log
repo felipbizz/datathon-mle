@@ -68,3 +68,24 @@
 2025-05-18 21:25:04,564 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 15
 2025-05-18 21:50:21,224 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
 2025-05-18 21:50:21,224 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 16
+2025-05-19 20:54:33,641 - model_controller - INFO - MLflow Tracking URI: http://127.0.0.1:5000
+2025-05-19 20:55:59,299 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 20:55:59,299 - model_controller - INFO - Listando modelos disponíveis para predição.
+2025-05-19 20:55:59,678 - model_controller - DEBUG - Retornando a lista de arquivos existentes: {'models': [{'name': 'RandomForest', 'version': '17', 'status': 'None', 'description': '', 'run_id': 'f5041009d66e450489351660962cfdec', 'creation_time': 1747354056285, 'last_updated_time': 1747617139018, 'tags': {}}]}
+2025-05-19 20:56:16,905 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 20:56:16,905 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 17
+2025-05-19 21:06:24,189 - model_controller - INFO - MLflow Tracking URI: http://localhost:5000
+2025-05-19 21:06:31,143 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 21:06:31,144 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 17
+2025-05-19 21:07:18,104 - model_controller - INFO - MLflow Tracking URI: http://localhost:5000
+2025-05-19 21:07:23,892 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 21:07:23,892 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 17
+2025-05-19 21:09:41,844 - model_controller - INFO - MLflow Tracking URI: 
+2025-05-19 21:10:04,931 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 21:10:04,932 - model_controller - INFO - Listando modelos disponíveis para predição.
+2025-05-19 21:10:04,939 - model_controller - DEBUG - Retornando a lista de arquivos existentes: {'models': []}
+2025-05-19 21:10:22,290 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 21:10:22,290 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 17
+2025-05-19 21:24:37,778 - model_controller - INFO - MLflow Tracking URI: http://localhost:5000
+2025-05-19 21:24:43,418 - model_controller - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 21:24:43,418 - model_controller - INFO - Iniciando previsão utilizando o modelo RandomForest versão 17

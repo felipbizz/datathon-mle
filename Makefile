@@ -17,8 +17,8 @@ all: help ## Abre a documentação mostrando os comandos disponíveis
 
 create-infra: ## Cria os containers de infraestrutura
 	@echo "Creating Docker containers..."
+	@$(MAKE) initialize-data set_tracking_uri adjust-permissions add-local-packages build-api-image
 	@cd $(INFRA_DIR) && docker compose up -d
-	@$(MAKE) initialize-data set_tracking_uri adjust-permissions add-local-packages
 
 destroy-infra: ## Remove os containers de infraestrutura
 	@echo "$(RED)Destroying Docker containers...$(NC)"
@@ -65,16 +65,9 @@ list_registered_models: ## Lista os modelos registrados
 	@echo "$(BLUE)Listando modelos registrados...$(NC)"
 	@python main.py --steps list_registered_models
 
-build_docker_image: ## Cria a imagem docker
-	@echo "Criando imagem Docker para $(model)..."
-	@lc_model=$(shell echo $(model) | tr '[:upper:]' '[:lower:]'); \
-	mlflow models build-docker --model-uri "models:/$(model)/$(version)" --name "$$lc_model:$(version)" 
-	@echo "Docker image built."
-
-serve_model: ## Roda o modelo em um container docker
-	@echo "Iniciando o modelo em um container Docker..."
-	@lc_model=$(shell echo $(model) | tr '[:upper:]' '[:lower:]'); \
-	docker run -dit -p 8080:8080 --name $$lc_model-$(version) $${lc_model}:$(version) 
+build-api-image: ## Cria a imagem da API
+	@echo "$(GREEN)Criando imagem da API...$(NC)"
+	@cd api && docker build -t api-mle:latest .
 
 build-bentoml: ## Cria o bentoml
 	@echo "Criando bentoml..."

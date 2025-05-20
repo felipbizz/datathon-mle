@@ -274,3 +274,38 @@
 2025-05-18 21:50:17,439 - api - INFO - Definindo o endpoint de coleta de métricas a ser usado pelo servidor do Prometheus.
 2025-05-18 21:50:17,439 - api - INFO - Realizando configuração inicial da API
 2025-05-18 21:50:17,440 - api - INFO - Adicionando middleware para CORS
+2025-05-19 20:54:31,150 - api - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 20:54:31,150 - api - INFO - Iniciando API
+2025-05-19 20:54:31,151 - api - INFO - Adicionando rotas.
+2025-05-19 20:54:33,646 - api - INFO - Configurando o instrumentador de métricas do cliente do Prometheus.
+2025-05-19 20:54:33,646 - api - INFO - Definindo o endpoint de coleta de métricas a ser usado pelo servidor do Prometheus.
+2025-05-19 20:54:33,646 - api - INFO - Realizando configuração inicial da API
+2025-05-19 20:54:33,646 - api - INFO - Adicionando middleware para CORS
+2025-05-19 21:06:22,065 - api - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 21:06:22,066 - api - INFO - Iniciando API
+2025-05-19 21:06:22,066 - api - INFO - Adicionando rotas.
+2025-05-19 21:06:24,193 - api - INFO - Configurando o instrumentador de métricas do cliente do Prometheus.
+2025-05-19 21:06:24,193 - api - INFO - Definindo o endpoint de coleta de métricas a ser usado pelo servidor do Prometheus.
+2025-05-19 21:06:24,193 - api - INFO - Realizando configuração inicial da API
+2025-05-19 21:06:24,194 - api - INFO - Adicionando middleware para CORS
+2025-05-19 21:07:16,408 - api - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 21:07:16,408 - api - INFO - Iniciando API
+2025-05-19 21:07:16,408 - api - INFO - Adicionando rotas.
+2025-05-19 21:07:18,109 - api - INFO - Configurando o instrumentador de métricas do cliente do Prometheus.
+2025-05-19 21:07:18,110 - api - INFO - Definindo o endpoint de coleta de métricas a ser usado pelo servidor do Prometheus.
+2025-05-19 21:07:18,110 - api - INFO - Realizando configuração inicial da API
+2025-05-19 21:07:18,110 - api - INFO - Adicionando middleware para CORS
+2025-05-19 21:09:40,234 - api - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 21:09:40,234 - api - INFO - Iniciando API
+2025-05-19 21:09:40,234 - api - INFO - Adicionando rotas.
+2025-05-19 21:09:41,848 - api - INFO - Configurando o instrumentador de métricas do cliente do Prometheus.
+2025-05-19 21:09:41,848 - api - INFO - Definindo o endpoint de coleta de métricas a ser usado pelo servidor do Prometheus.
+2025-05-19 21:09:41,848 - api - INFO - Realizando configuração inicial da API
+2025-05-19 21:09:41,848 - api - INFO - Adicionando middleware para CORS
+2025-05-19 21:24:35,531 - api - INFO - ---------------------------------------------------------------------------------------------------
+2025-05-19 21:24:35,531 - api - INFO - Iniciando API
+2025-05-19 21:24:35,532 - api - INFO - Adicionando rotas.
+2025-05-19 21:24:37,782 - api - INFO - Configurando o instrumentador de métricas do cliente do Prometheus.
+2025-05-19 21:24:37,782 - api - INFO - Definindo o endpoint de coleta de métricas a ser usado pelo servidor do Prometheus.
+2025-05-19 21:24:37,782 - api - INFO - Realizando configuração inicial da API
+2025-05-19 21:24:37,783 - api - INFO - Adicionando middleware para CORS

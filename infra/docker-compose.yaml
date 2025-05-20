@@ -60,6 +60,17 @@ services:
       - ./volumes/mlflow/sqlite:/sqlite
     command: "mlflow server --backend-store-uri sqlite:///sqlite/mlflow.db --default-artifact-root http://localhost:5000/api/2.0/mlflow-artifacts/artifacts/experiments --host 0.0.0.0"
 
+  api:
+    image: api-mle:latest
+    container_name: api
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./volumes/api/logs:/app/logs
+    # command: "mlflow server --backend-store-uri sqlite:///sqlite/mlflow.db --default-artifact-root http://localhost:5000/api/2.0/mlflow-artifacts/artifacts/experiments --host 0.0.0.0"
+
   
   
   # front:
