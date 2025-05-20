@@ -58,7 +58,7 @@ services:
     volumes:
       - ./volumes/mlflow/mlruns:/mlartifacts/experiments
       - ./volumes/mlflow/sqlite:/sqlite
-    command: "mlflow server --backend-store-uri sqlite:///sqlite/mlflow.db --default-artifact-root http://localhost:5000/api/2.0/mlflow-artifacts/artifacts/experiments --host 0.0.0.0"
+    command: "mlflow server --backend-store-uri sqlite:///sqlite/mlflow.db --default-artifact-root http://mlflow:5000/api/2.0/mlflow-artifacts/artifacts/experiments --host 0.0.0.0"
 
   api:
     image: api-mle:latest

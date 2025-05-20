@@ -2,6 +2,7 @@
 INFRA_DIR=infra
 SCRIPTS_DIR=scripts
 LOCAL_PACKAGES := $(wildcard ./infra/packages/*)
+MLFLOW_SERVER=127.0.0.1
 
 # Text Colors
 RED=\033[31m
@@ -17,7 +18,7 @@ all: help ## Abre a documentação mostrando os comandos disponíveis
 
 create-infra: ## Cria os containers de infraestrutura
 	@echo "Creating Docker containers..."
-	@$(MAKE) initialize-data set_tracking_uri adjust-permissions add-local-packages build-api-image
+	@$(MAKE) initialize-data set_tracking_uri update-hosts-file adjust-permissions add-local-packages build-api-image
 	@cd $(INFRA_DIR) && docker compose up -d
 
 destroy-infra: ## Remove os containers de infraestrutura
@@ -28,6 +29,10 @@ initialize-data: ## Baixa os arquivos de dados
 	@echo "Criando estrutura de pastas..."
 	@$(SCRIPTS_DIR)/initialize_data.sh
 	@echo "Estrutura criada, $(YELLOW)adicione os dados brutos na pasta de raw data!!$(NC)"
+
+update-hosts-file: ## Atualiza o arquivo /etc/hosts
+	@echo "$(BLUE)Atualizando o arquivo /etc/hosts...$(NC)"
+	@cat /etc/hosts |grep mlflow && echo "Já atualizado..." || sudo bash -c  'echo "$(MLFLOW_SERVER) mlflow" >> /etc/hosts'
 
 set_tracking_uri: ## Define a URI de rastreamento do MLflow
 	@echo "$(BLUE)Definindo URI de rastreamento do MLflow...$(NC)"
