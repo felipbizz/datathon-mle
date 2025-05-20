@@ -2,11 +2,17 @@ from mlflow.tracking import MlflowClient
 import pandas as pd
 import numpy as np
 import mlflow
+from mle_datathon.utils.logger import set_log
+
+logger = set_log("model_registry")
 
 class ModelRegistry():
     def __init__(self, tracking_uri: str):
-
+        logger.info(f"Conectando ao MLflow com URI: {tracking_uri}")
         self.client = MlflowClient(tracking_uri=tracking_uri)
+        self.tracking_uri = tracking_uri
+        mlflow.set_tracking_uri(self.tracking_uri)
+        mlflow.set_registry_uri(self.tracking_uri)
 
     def purge_registered_models(self):
         """
@@ -24,18 +30,20 @@ class ModelRegistry():
         registered_models = {
             "models" : []
         }
-        
+
         for rm in self.client.search_registered_models():
             model = {
                 "name": rm.name,
-                "version": rm.latest_versions[0].version,
-                "status": rm.latest_versions[0].current_stage,
-                "description": rm.description,
-                "run_id": rm.latest_versions[0].run_id,
                 "creation_time": rm.creation_timestamp,
                 "last_updated_time": rm.last_updated_timestamp,
                 "tags": rm.tags,
             }
+
+            model_versions = []
+            for version in self.client.search_model_versions(f"name='{model["name"]}'"):
+                model_versions.append(version)
+
+            model["versions"] = model_versions
             registered_models["models"].append(model)
 
         return registered_models
@@ -45,12 +53,14 @@ class ModelRegistry():
         Carregando modelo treinado do registro.
         """
         model_uri = f"models:/{model_name}/{version}"
-        try:
+        try:           
+
+            # mlflow.get_artifact_uri()
             model = mlflow.sklearn.load_model(model_uri=model_uri)
-            print(f'Model type: {type(model)}')
+            logger.info(f'Model type: {type(model)}')
             return model
         except Exception as e:
-            print(f"Erro ao carregar o modelo: {e}")
+            logger.info(f"Erro ao carregar o modelo: {e}")
             return None
         
     def predict(self, model_name: str, version: int, data: list, predict_type: str = "predict_proba"):
@@ -73,20 +83,11 @@ class ModelRegistry():
                         predictions = model.predict_log_proba(data_array)
                     case _:
                         raise ValueError("Tipo de previsão inválido. Use 'predict_proba', 'predict' ou 'predict_log_proba'.")
-
-                # if predict_type == "predict_proba":
-                #     predictions = model.predict_proba(data_array)
-                # elif predict_type == "predict":
-                #     predictions = model.predict(data_array)
-                # elif predict_type == "predict_log_proba":
-                #     predictions = model.predict_log_proba(data_array)
-                # else:
-                #     raise ValueError("Tipo de previsão inválido. Use 'predict_proba', 'predict' ou 'predict_log_proba'.")   
-        
+       
                 return predictions
             except Exception as e:
-                print(f"Erro ao fazer previsões: {e}")
+                logger.info(f"Erro ao fazer previsões: {e}")
                 return None
         else:
-            print("Modelo não encontrado.")
+            logger.info("Modelo não encontrado.")
             return None
