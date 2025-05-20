@@ -92,4 +92,4 @@ cython_debug/
 # ruff
 .ruff_cache/
 
-# **/.terraform/
+**/.terraform/
