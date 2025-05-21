@@ -11,6 +11,10 @@ Este projeto demonstra a implementação de um pipeline completo de Engenharia d
 - Criar um sistema pronto para produção com interfaces de API e frontend
 - Demonstrar o gerenciamento do ciclo de vida completo de ML
 
+## Visualização Exemplo
+![image](https://github.com/user-attachments/assets/d19eab74-096b-4441-8ee5-11d5dd0712f3)
+
+
 ## 🏗️ Arquitetura do Sistema
 
 O projeto segue uma arquitetura modular com três componentes principais:
