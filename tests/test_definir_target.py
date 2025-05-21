@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from src.definir_target import (
+from mle_datathon.data_processing.definir_target import (
     situacao_candidado_nao_aprovado,
     situacao_candidado_aprovado,
     situacao_candidado_desistente,

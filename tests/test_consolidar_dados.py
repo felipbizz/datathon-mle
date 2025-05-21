@@ -1,7 +1,6 @@
 import pytest
 import pandas as pd
 import numpy as np
-from src.consolidar_dados import consolidar_dados
 
 @pytest.fixture
 def sample_data():
