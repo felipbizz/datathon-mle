@@ -1,14 +1,17 @@
 import pickle
 import bentoml
 import os
-from config import load_config
+from mle_datathon.logger import set_log
+from mle_datathon.utils import load_config
 
-config = load_config()
+local_path = os.getcwd()
+config = load_config(local_path)
 paths = config["paths"]
+logger = set_log("save_model")
 
 
 if not os.path.exists(paths["modelo_treinado"]):
-    print(f"Erro: Arquivo pickle não encontrado em {paths["modelo_treinado"]}")
+    logger.info(f"Erro: Arquivo pickle não encontrado em {paths["modelo_treinado"]}")
 else:
     with open(paths["modelo_treinado"], "rb") as f:
         dados_carregados = pickle.load(f)
@@ -19,7 +22,7 @@ else:
     scaler = dados_carregados["scaler"]
     features = dados_carregados["features"]
 
-    print("Componentes carregados do pickle.")
+    logger.info("Componentes carregados do pickle.")
 
     # --- Salve no formato BentoML ---
     tag_modelo = "classificador_de_candidatos" # <--- Escolha um nome para o seu bento model
@@ -40,7 +43,7 @@ else:
         metadata=metadata
     )
 
-    print(f"Modelo e pré-processadores salvos no BentoML com a tag: {saved_model_ref.tag}")
+    logger.info(f"Modelo e pré-processadores salvos no BentoML com a tag: {saved_model_ref.tag}")
 
     # Alternativa (mais avançada): Salvar o modelo SKLearn diretamente
     # E carregar os pré-processadores separadamente no serviço.

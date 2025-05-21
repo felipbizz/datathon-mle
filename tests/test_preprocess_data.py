@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from src.preprocess_data import clean_data
+from mle_datathon.data_processing.preprocess_data import clean_data
 import numpy as np
 from datetime import datetime
 

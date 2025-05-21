@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
-from src.train_model import log_system_info
+from mle_datathon.model.train_model import log_system_info
 
 @pytest.fixture
 def sample_dataset():

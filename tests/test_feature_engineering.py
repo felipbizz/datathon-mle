@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from src.feature_engineering import (
+from mle_datathon.data_processing.feature_engineering import (
     coluna_valida,
     tamanho_texto,
     n_palavras,

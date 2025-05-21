@@ -8,15 +8,25 @@ from sklearn.metrics import make_scorer, roc_auc_score, f1_score, precision_scor
 import mlflow
 import yaml
 from datetime import datetime
-from train_model import load_config, get_abs_path
+# from train_model import load_config, get_abs_path
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 import xgboost as xgb
-import lightgbm as lgb
+# import lightgbm as lgb
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+# from mle_utils.logger import set_log
+import os
+
+from mle_datathon.utils import (
+    get_abs_path, 
+    load_config, 
+    set_log
+)
+
+logger = set_log("tune_model")
 
 def tune_models(X_train, y_train, config, cv=5):
     """Perform hyperparameter tuning for all models."""
@@ -40,20 +50,20 @@ def tune_models(X_train, y_train, config, cv=5):
             'subsample': [0.8, 0.9],
             'colsample_bytree': [0.8, 0.9]
         },
-        "LightGBM": {
-            'learning_rate': [0.01, 0.1],
-            'max_depth': [3, 5, 7],
-            'n_estimators': [100, 200],
-            'subsample': [0.8, 0.9],
-            'colsample_bytree': [0.8, 0.9]
-        }
+        # "LightGBM": {
+        #     'learning_rate': [0.01, 0.1],
+        #     'max_depth': [3, 5, 7],
+        #     'n_estimators': [100, 200],
+        #     'subsample': [0.8, 0.9],
+        #     'colsample_bytree': [0.8, 0.9]
+        # }
     }
     
     models = {
         "RandomForest": RandomForestClassifier(random_state=config["model"]["random_state"]),
         "LogisticRegression": LogisticRegression(random_state=config["model"]["random_state"]),
         "XGBoost": xgb.XGBClassifier(random_state=config["model"]["random_state"]),
-        "LightGBM": lgb.LGBMClassifier(random_state=config["model"]["random_state"])
+        # "LightGBM": lgb.LGBMClassifier(random_state=config["model"]["random_state"])
     }
     
     scoring = {
@@ -67,7 +77,7 @@ def tune_models(X_train, y_train, config, cv=5):
     
     for name, model in models.items():
         with mlflow.start_run(run_name=f'tuning_{name}_{datetime.now().strftime("%Y-%m-%d_%H_%M_%S")}'):
-            print(f"\nTuning {name}...")
+            logger.info(f"\nTuning {name}...")
             
             grid_search = GridSearchCV(
                 estimator=model,
@@ -79,6 +89,7 @@ def tune_models(X_train, y_train, config, cv=5):
                 verbose=2
             )
             
+            logger.debug('Starting grid search...')
             grid_search.fit(X_train, y_train)
             
             # Log results
@@ -87,17 +98,31 @@ def tune_models(X_train, y_train, config, cv=5):
             
             best_params[name] = grid_search.best_params_
             
-            print(f"Best parameters for {name}:")
-            print(grid_search.best_params_)
-            print(f"Best CV score: {grid_search.best_score_:.4f}")
+            logger.info(f"Best parameters for {name}:")
+            logger.info(grid_search.best_params_)
+            logger.info(f"Best CV score: {grid_search.best_score_:.4f}")
     
     return best_params
 
-def main():
-    config = load_config()
+def update_config_file(config):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    save_config = f"config_{timestamp}.yaml"
+
+    """Update the config file with the best parameters."""
+    with open(save_config, "w") as f:
+        yaml.dump(config, f)
+    logger.info("Config file updated with best parameters.")
+
+
+def tune():
+
+    local_path = os.getcwd()
+    
+    config = load_config(local_path)
     paths = config["paths"]
+
     for k in paths:
-        paths[k] = get_abs_path(paths[k])
+        paths[k] = get_abs_path(local_path,paths[k])
     
     # Load and prepare data
     df = pd.read_parquet(paths["dataset_features"])
@@ -125,11 +150,4 @@ def main():
     # Update config with best parameters
     config["model"]["tuned_params"] = best_params
     
-    # Save updated config
-    with open("config.yaml", "w") as f:
-        yaml.dump(config, f)
-    
-    print("\nBest parameters saved to config.yaml")
-
-if __name__ == "__main__":
-    main()
+    update_config_file(config)
