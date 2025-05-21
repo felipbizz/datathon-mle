@@ -9,7 +9,7 @@ logger = set_log("api_settings")
 
 
 def include_router_from_module(app: FastAPI, module: Any, module_name: str) -> None:
-    logger.info(f"Extraindo atributos do módulo {module_name}")
+    logger.info(f"Extraindo atributos do módulo: {module_name}")
     module_attributes: dict = vars(module)
 
     router_found = False

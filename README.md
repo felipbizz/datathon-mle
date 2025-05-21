@@ -2,8 +2,6 @@
 
 ## Visão Geral do Projeto
 
-Este projeto demonstra a implementação de um pipeline completo de Engenharia de Machine Learning (MLE) para prever o sucesso de candidatos em processos seletivos. O sistema integra práticas modernas de MLE, incluindo versionamento de modelos, implantação de API e capacidades de inferência.
-
 ## 🎯 Objetivos do Projeto
 
 - Desenvolver um pipeline robusto de ML para previsão de sucesso de candidatos
@@ -60,21 +58,6 @@ O projeto segue uma arquitetura modular com três componentes principais:
 - **Documentação**: Markdown
 
 ## 📦 Estrutura do Projeto
-
-```
-├── api/                    # Serviço FastAPI
-│   ├── controllers/       # Endpoints da API
-│   ├── main.py           # Ponto de entrada da API
-│   └── Dockerfile        # Configuração do container
-├── front/                 # Frontend Streamlit
-│   └── app.py            # Aplicação web
-├── packages_src/          # Pacote core de ML
-│   └── mle_datathon/     # Implementação do pipeline de ML
-├── tests/                # Suíte de testes
-├── notebooks/            # Jupyter notebooks
-├── infra/               # Código de infraestrutura
-└── main.py              # Ponto de entrada principal
-```
 
 ## 🚀 Começando
 
@@ -226,6 +209,7 @@ pytest tests/
 
 ## 📚 Documentação
 
+=======
 - Documentação da API: `http://localhost:8000/docs`
 - Tracking do MLflow: `http://localhost:5000`
 - Interface Streamlit: `http://localhost:8501`
