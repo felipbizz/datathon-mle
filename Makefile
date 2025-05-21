@@ -1,6 +1,7 @@
 # Define variables
 INFRA_DIR=infra
 SCRIPTS_DIR=infra/scripts
+MLE_PACKAGE_DIR=packages_src/mle_datathon
 LOCAL_PACKAGES := $(wildcard ./infra/packages/*)
 MLFLOW_SERVER=127.0.0.1
 
@@ -49,9 +50,9 @@ add-local-packages: ## Instala pacotes locais
 
 build-local-packages: ## Cria o pacote local do projeto
 	@echo "$(BLUE)Building local packages...$(NC)"
-	@cd packages_src/mle_datathon && uv build
-	@cp dist/mle_datathon-0.1.0-py3-none-any ../../infra/packages
-	@cp dist/mle_datathon-0.1.0-py3-none-any ../../api/packages
+	@cd $(MLE_PACKAGE_DIR) && uv build
+	@cp -f $(MLE_PACKAGE_DIR)/dist/mle_datathon-0.1.0-py3-none-any.whl infra/packages
+	@cp -f $(MLE_PACKAGE_DIR)/dist/mle_datathon-0.1.0-py3-none-any.whl api/packages
 
 start-infra: ## Inicializa os containers de infraestrutura sem criar novos
 	@echo "$(GREEN)Starting Docker containers...$(NC)"
