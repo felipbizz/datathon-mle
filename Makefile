@@ -112,6 +112,10 @@ test-consolidate: ## Run data consolidation tests
 test-training: ## Run model training tests
 	@pytest tests/test_train_model.py -v
 
+front-end: ## Inicia o frontend
+	@echo "$(GREEN)Iniciando o frontend...$(NC)"
+	@streamlit run front/app.py
+
 help: ## Mostra os comandos. Você precisa sempre comentar o que a função faz, se não ela não será exibida nesse help
 	@echo "\nEscolha um comando. As opções são:\n"
 	@grep -E '^[0-9a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "};\
