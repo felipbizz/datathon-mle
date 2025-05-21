@@ -124,7 +124,7 @@ def limpar_datas(valor):
         if valor in ("0000-00-00", "0000", "0"):
             return None
     try:
-        data = pd.to_datetime(valor, errors="coerce")
+        data = pd.to_datetime(valor, errors="coerce", dayfirst=True)
         if pd.isna(data):
             return None
         if data.year < 1930 or data.year > 2030:
