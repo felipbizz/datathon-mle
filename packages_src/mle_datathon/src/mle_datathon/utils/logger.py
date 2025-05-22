@@ -6,7 +6,7 @@ from logging.handlers import TimedRotatingFileHandler
 def set_log(
     logfile: str,
     format: str = None,
-    level: int = logging.DEBUG,
+    level: int = logging.ERROR,
     rotation: str = "d",
     backupCount: int = 30,
     log_location: str = None,

@@ -6,15 +6,18 @@ import os
 
 from nltk.corpus import stopwords
 from unidecode import unidecode
-from mle_datathon.utils import (
-    get_abs_path, 
-    load_config, 
-    set_log
-)
+from mle_datathon.utils import get_abs_path, load_config, set_log
 
 logger = set_log("preprocess_data")
 
-nltk.download("stopwords")
+try:
+    nltk.data.find("corpora/stopwords")
+    logger.info("NLTK stopwords already downloaded.")
+except LookupError:
+    logger.info("NLTK stopwords not found. Downloading...")
+    nltk.download("stopwords")
+    logger.info("NLTK stopwords downloaded successfully.")
+
 stop_words = set(stopwords.words("portuguese"))
 
 local_path = os.getcwd()
@@ -98,17 +101,17 @@ def limpar_numeros(valor):
         if isinstance(valor, str):
             valor = valor.strip()
             # Case 1: US format (1,234.56)
-            if ',' in valor and '.' in valor:
-                if valor.find(',') < valor.find('.'):
-                    return float(valor.replace(',', ''))
+            if "," in valor and "." in valor:
+                if valor.find(",") < valor.find("."):
+                    return float(valor.replace(",", ""))
             # Case 2: Brazilian format (2.000,00)
-            if '.' in valor and ',' in valor:
-                if valor.find('.') < valor.find(','):
-                    cleaned = valor.replace('.', '').replace(',', '.')
+            if "." in valor and "," in valor:
+                if valor.find(".") < valor.find(","):
+                    cleaned = valor.replace(".", "").replace(",", ".")
                     return float(cleaned)
             # Case 3: Simple comma as decimal
-            if ',' in valor and '.' not in valor:
-                return float(valor.replace(',', '.'))
+            if "," in valor and "." not in valor:
+                return float(valor.replace(",", "."))
             # Case 4: Plain number
             return float(valor)
         return np.nan
@@ -156,7 +159,7 @@ def clean_data(
     df = df.copy()  # Create a copy to avoid modifying original
     df = remove_colunas_dominantes(df)
     df = remove_colunas_irrelevantes(df)
-    
+
     if colunas_texto:
         for col in colunas_texto:
             df[col] = df[col].apply(limpar_texto)
@@ -165,17 +168,59 @@ def clean_data(
             df[col] = df[col].apply(limpar_datas)
     if colunas_anos:
         for col in colunas_anos:
-            df[col] = pd.to_numeric(df[col].apply(limpar_anos), errors='coerce')
+            df[col] = pd.to_numeric(df[col].apply(limpar_anos), errors="coerce")
     if colunas_numeros:
         for col in colunas_numeros:
-            df[col] = pd.to_numeric(df[col].apply(limpar_numeros), errors='coerce')
+            df[col] = pd.to_numeric(df[col].apply(limpar_numeros), errors="coerce")
+
+    # precisa melhorar o preenchimento de valores ausentes
+    colunas_cat = df.select_dtypes(include="object").columns
+    for col in colunas_cat:
+        df[col] = df[col].fillna("desconhecido")
+
     return df
+
+
+situacao_candidado_nao_aprovado = [
+    "nao aprovado rh",
+    "nao aprovado cliente",
+    "nao aprovado requisitante",
+    "recusado",
+]
+situacao_candidado_aprovado = [
+    "contratado decision",
+    "prospect",
+    "entrevista tecnica",
+    "proposta aceita",
+    "contratado hunting",
+    "entrevista cliente",
+    "documentacao clt",
+    "documentacao pj",
+    "documentacao cooperado",
+    "encaminhar proposta",
+]
+situacao_candidado_desistente = ["desistiu", "desistiu contratacao", "avaliacao rh"]
+situacao_candidato_inicial = [
+    "encaminhado requisitante",
+    "interesse nesta vaga",
+    "inscrito",
+]
+
+mapping = {}
+for s in situacao_candidado_nao_aprovado:
+    mapping[s] = "nao_aprovado"
+for s in situacao_candidado_aprovado:
+    mapping[s] = "aprovado"
+for s in situacao_candidado_desistente:
+    mapping[s] = "desistente"
+for s in situacao_candidato_inicial:
+    mapping[s] = "inicial"
 
 
 def execute_preprocess():
     paths = config["paths"]
     # df_applicants
-    path_applicants = get_abs_path(local_path,paths["applicants_json"])
+    path_applicants = get_abs_path(local_path, paths["applicants_json"])
     cols_applicants = [
         "infos_basicas",
         "informacoes_pessoais",
@@ -185,24 +230,28 @@ def execute_preprocess():
     df_applicants = convert_json_to_df(
         path=path_applicants, index_col="cod_applicant", cols_normalize=cols_applicants
     )
-    df_applicants.to_parquet(get_abs_path(local_path,paths["applicants_bronze"]), index=False)
+    df_applicants.to_parquet(
+        get_abs_path(local_path, paths["applicants_bronze"]), index=False
+    )
     logger.info("df_applicants %s", df_applicants.shape)
 
     # df_prospects
-    path_prospects = get_abs_path(local_path,paths["prospects_json"])
+    path_prospects = get_abs_path(local_path, paths["prospects_json"])
     df_prospects = convert_json_to_df(
         path=path_prospects, index_col="cod_vaga", explode_col="prospects"
     )
-    df_prospects.to_parquet(get_abs_path(local_path,paths["prospects_bronze"]), index=False)
+    df_prospects.to_parquet(
+        get_abs_path(local_path, paths["prospects_bronze"]), index=False
+    )
     logger.info("df_prospects %s", df_prospects.shape)
 
     # df_vagas
-    path_vagas = get_abs_path(local_path,paths["vagas_json"])
+    path_vagas = get_abs_path(local_path, paths["vagas_json"])
     cols_vagas = ["informacoes_basicas", "perfil_vaga", "beneficios"]
     df_vagas = convert_json_to_df(
         path=path_vagas, index_col="cod_vaga", cols_normalize=cols_vagas
     )
-    df_vagas.to_parquet(get_abs_path(local_path,paths["vagas_bronze"]), index=False)
+    df_vagas.to_parquet(get_abs_path(local_path, paths["vagas_bronze"]), index=False)
     logger.info("df_vagas %s", df_vagas.shape)
 
     logger.info("# --- TRATANDO COLUNAS TABELA APPLICANTS ---")
@@ -224,7 +273,9 @@ def execute_preprocess():
         ["ano_conclusao"],
         ["remuneracao"],
     )
-    df_applicants.to_parquet(get_abs_path(local_path,paths["applicants_silver"]), index=False)
+    df_applicants.to_parquet(
+        get_abs_path(local_path, paths["applicants_silver"]), index=False
+    )
 
     logger.info("# --- TRATANDO COLUNAS TABELA VAGAS ---  ")
     colunas_texto_vagas = [
@@ -245,11 +296,63 @@ def execute_preprocess():
     ]
 
     df_vagas = clean_data(df_vagas, colunas_texto_vagas, colunas_datas_vagas)
-    df_vagas.to_parquet(get_abs_path(local_path,paths["vagas_silver"]), index=False)
+    df_vagas.to_parquet(get_abs_path(local_path, paths["vagas_silver"]), index=False)
 
     logger.info("# --- TRATANDO COLUNAS TABELA PROSPECTS ---")
 
     colunas_texto_prospects = ["titulo", "situacao_candidado", "comentario"]
-    df_prospects = clean_data(df_prospects, colunas_texto_prospects)
-    df_prospects.to_parquet(get_abs_path(local_path,paths["prospects_silver"]), index=False)
+    colunas_datas_prospects = ["data_candidatura"]
+    df_prospects = clean_data(
+        df_prospects, colunas_texto_prospects, colunas_datas_prospects
+    )
+    df_prospects.to_parquet(
+        get_abs_path(local_path, paths["prospects_silver"]), index=False
+    )
     logger.info("Data preprocessing completed.")
+
+    df = df_prospects.merge(df_vagas, on="cod_vaga", how="left", suffixes=("", "_vaga"))
+
+    output_path = get_abs_path(local_path, paths["dataset_consolidado"])
+    df.to_parquet(output_path, index=False)
+    logger.info(f"Dataset consolidado salvo em: {output_path}")
+
+    df = pd.read_parquet(get_abs_path(local_path, paths["dataset_consolidado"]))
+    df["situacao_candidado"] = df["situacao_candidado"].replace(mapping)
+
+    # Definindo a target
+    df["target"] = (df["situacao_candidado"] == "aprovado").astype(int)
+
+    # Remover colunas que não podem ser usadas como preditoras
+    colunas_remover = [
+        "analista_responsavel",
+        "cidade",
+        "cliente",
+        "cod_vaga",
+        "codigo",
+        "data_candidatura",
+        "data_final",
+        "data_inicial",
+        "data_requicisao",
+        "empresa_divisao",
+        "estado",
+        "limite_esperado_para_contratacao",
+        "local_trabalho",
+        "nome",
+        "recrutador",
+        "regiao",
+        "requisitante",
+        "situacao_candidado",
+        "solicitante_cliente",
+        "ultima_atualizacao",
+    ]
+    df_model = df.drop(columns=[col for col in colunas_remover if col in df.columns])
+
+    # Salva o dataset de modelagem usando caminho absoluto
+    df_model.to_parquet(
+        get_abs_path(local_path, paths["dataset_modelagem"]), index=False
+    )
+    logger.info(f"Dataset para modelagem salvo em {paths['dataset_modelagem']}")
+    logger.info("Distribuição da variável-alvo:")
+    logger.info(df["target"].value_counts())
+    logger.info("Distribuição das categorias de situação do candidato:")
+    logger.info(df["situacao_candidado"].value_counts())

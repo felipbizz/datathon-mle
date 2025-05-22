@@ -81,7 +81,7 @@ pipeline: ## Roda pipeline completo
 	@python main.py
 
 train:  ## Roda etapa de treinamento
-	@echo "$(CYAN)Executando o pipeline completo...$(NC)"
+	@echo "$(CYAN)Executando o treinamento ...$(NC)"
 	@python main.py --steps train_model
 
 tune: ## Roda etapa de ajuste de hiperparâmetros

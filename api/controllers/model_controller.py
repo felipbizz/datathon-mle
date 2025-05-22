@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Body
-import requests
-from typing import Annotated, Any
+from typing import Annotated
 from mle_datathon.utils import set_log
 from mle_datathon.model import ModelRegistry
-import numpy as np
 
 import os
 
@@ -11,7 +9,7 @@ from prometheus_client import Summary, Counter
 
 logger = set_log("model_controller", level=10)
 
-tracking_uri = os.getenv("MLFLOW_TRACKING_URI","http://127.0.0.1:5000")
+tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
 logger.info(f"MLflow Tracking URI: {tracking_uri}")
 
 mr = ModelRegistry(tracking_uri=tracking_uri)
@@ -61,39 +59,17 @@ def list_models():
 
 @router.post("/predict")
 @PREDICT_REQUEST_TIME.time()
-def predict(model_name: Annotated[str | None, Body()], model_version: Annotated[int | None, Body()], data: Annotated[list | None, Body()]):
-    
+def predict(
+    model_name: Annotated[str | None, Body()],
+    model_version: Annotated[int | None, Body()],
+    data: Annotated[list | None, Body()],
+):
     logger.info(
         "---------------------------------------------------------------------------------------------------"
     )
-    logger.info(f"Iniciando previsão utilizando o modelo {model_name} versão {model_version}")
+    logger.info(
+        f"Iniciando previsão utilizando o modelo {model_name} versão {model_version}"
+    )
     PREDICT_COUNT.inc()
 
-    return mr.predict(model_name=model_name, version=model_version,data=data).tolist()
-
-@router.get("/test")
-def test():
-    """
-    Testa a conexão com o modelo.
-
-    Parameters:
-
-        Nenhum parâmetro necessário.
-
-    Returns:
-
-        str : Mensagem de sucesso.
-    """
-
-    logger.info(
-        "---------------------------------------------------------------------------------------------------"
-    )
-    logger.info("Testando a conexão com o modelo.")
-
-    response = requests.get(f"{tracking_uri}/api/2.0/mlflow-artifacts/artifacts?path=experiments%2F6%2Ff5041009d66e450489351660962cfdec%2Fartifacts%2FRandomForest")
-    
-
-
-
-    return response.json()
-
+    return mr.predict(model_name=model_name, version=model_version, data=data).tolist()

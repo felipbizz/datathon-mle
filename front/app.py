@@ -11,43 +11,65 @@ from loguru import logger
 try:
     current_script_path = os.path.abspath(__file__)
     current_script_dir = os.path.dirname(current_script_path)
-    project_root = os.path.dirname(current_script_dir) # Assumindo que app.py está em uma subpasta
+    project_root = os.path.dirname(
+        current_script_dir
+    )  # Assumindo que app.py está em uma subpasta
     # Se o script estiver na raiz do projeto: project_root = current_script_dir
-    src_dir_path = os.path.join(project_root, 'src')
+    src_dir_path = os.path.join(project_root, "src")
 
     if src_dir_path not in sys.path:
         sys.path.insert(0, src_dir_path)
 
     # As importações de mle_datathon permanecem, pois são sua biblioteca customizada
-    from mle_datathon.utils import get_abs_path # Pode ser menos usado agora, mas mantido caso suas funções internas precisem
-    from mle_datathon.data_processing.feature_engineering import clean_features_data, transform_new_data
+    from mle_datathon.utils import (
+        get_abs_path,
+    )  # Pode ser menos usado agora, mas mantido caso suas funções internas precisem
+    from mle_datathon.data_processing.feature_engineering import (
+        clean_features_data,
+        transform_new_data,
+    )
 except ImportError as e:
-    st.error(f"Erro ao importar módulos do projeto: {e}. Verifique a estrutura de pastas e o PYTHONPATH.")
+    st.error(
+        f"Erro ao importar módulos do projeto: {e}. Verifique a estrutura de pastas e o PYTHONPATH."
+    )
     logger.critical(f"Falha na importação de módulos customizados: {e}")
     st.stop()
-except NameError: # __file__ not defined (e.g. running in stlite or certain IDEs without it)
-    project_root = os.getcwd() # Fallback
-    logger.warning("__file__ não definido, usando os.getcwd() como project_root. Caminhos hardcoded podem precisar de ajuste manual.")
+except (
+    NameError
+):  # __file__ not defined (e.g. running in stlite or certain IDEs without it)
+    project_root = os.getcwd()  # Fallback
+    logger.warning(
+        "__file__ não definido, usando os.getcwd() como project_root. Caminhos hardcoded podem precisar de ajuste manual."
+    )
     # Potencialmente adicionar src_dir_path aqui também se necessário e não feito acima.
 
 st.set_page_config(layout="wide", page_title="Previsão de Sucesso de Candidatos")
 
 # --- Valores Hardcoded (Substitua pelos seus caminhos e URL corretos) ---
 # Estes caminhos são relativos à raiz do projeto (project_root)
-PATH_MODELO_TREINADO = os.path.join(project_root, "Datathon Decision/4_gold", "modelo_treinado.pkl") # Exemplo, ajuste o nome
-PATH_PROSPECTS_SILVER = os.path.join(project_root, "Datathon Decision/3_silver", "prospects.parquet") # Exemplo
-PATH_VAGAS_SILVER = os.path.join(project_root, "Datathon Decision/3_silver", "vagas.parquet") # Exemplo
-PATH_ENCODERS_GOLD = os.path.join(project_root, "Datathon Decision/4_gold", "encoders") # Exemplo
+PATH_MODELO_TREINADO = os.path.join(
+    project_root, "Datathon Decision/4_gold", "modelo_treinado.pkl"
+)  # Exemplo, ajuste o nome
+PATH_PROSPECTS_SILVER = os.path.join(
+    project_root, "Datathon Decision/3_silver", "prospects.parquet"
+)  # Exemplo
+PATH_VAGAS_SILVER = os.path.join(
+    project_root, "Datathon Decision/3_silver", "vagas.parquet"
+)  # Exemplo
+PATH_ENCODERS_GOLD = os.path.join(
+    project_root, "Datathon Decision/4_gold", "encoders"
+)  # Exemplo
 API_URL = "http://localhost:8000/api/v1/model/predict"
 
 # --- Funções Auxiliares ---
 
-@st.cache_data # Usar _ aqui para indicar que a função não recebe argumentos variáveis para cache
+
+@st.cache_data  # Usar _ aqui para indicar que a função não recebe argumentos variáveis para cache
 def carregar_recursos_aplicacao_hardcoded():
     logger.info("Carregando recursos da aplicação (valores hardcoded)...")
     try:
         # Usar os paths hardcoded diretamente
-        with open(PATH_MODELO_TREINADO, 'rb') as f_model:
+        with open(PATH_MODELO_TREINADO, "rb") as f_model:
             dados_modelo = pickle.load(f_model)
 
         df_prospects = pd.read_parquet(PATH_PROSPECTS_SILVER)
@@ -55,13 +77,17 @@ def carregar_recursos_aplicacao_hardcoded():
 
         # Verificar se o caminho dos encoders existe
         if not os.path.exists(PATH_ENCODERS_GOLD):
-             logger.warning(f"Caminho para encoders não encontrado: {PATH_ENCODERS_GOLD}. 'transform_new_data' pode falhar.")
+            logger.warning(
+                f"Caminho para encoders não encontrado: {PATH_ENCODERS_GOLD}. 'transform_new_data' pode falhar."
+            )
 
         logger.info("Recursos da aplicação carregados com sucesso.")
         return dados_modelo, df_prospects, df_vagas, API_URL, PATH_ENCODERS_GOLD
     except FileNotFoundError as e:
         logger.error(f"Arquivo não encontrado durante o carregamento de recursos: {e}")
-        st.error(f"Erro: Arquivo essencial não encontrado: {e}. Verifique os caminhos definidos no código.")
+        st.error(
+            f"Erro: Arquivo essencial não encontrado: {e}. Verifique os caminhos definidos no código."
+        )
         return None, None, None, None, None
     except Exception as e:
         logger.error(f"Erro inesperado ao carregar recursos: {e}")
@@ -69,9 +95,18 @@ def carregar_recursos_aplicacao_hardcoded():
         return None, None, None, None, None
 
 
-def preparar_dados_para_payload(prospect_df, vagas_df, encoders_path_param, feature_list_param, imputer_obj_param, scaler_obj_param):
+def preparar_dados_para_payload(
+    prospect_df,
+    vagas_df,
+    encoders_path_param,
+    feature_list_param,
+    imputer_obj_param,
+    scaler_obj_param,
+):
     logger.info("Iniciando preparação de dados para o payload.")
-    caso_merged = prospect_df.merge(vagas_df, on='cod_vaga', how='left', suffixes=('', '_vaga'))
+    caso_merged = prospect_df.merge(
+        vagas_df, on="cod_vaga", how="left", suffixes=("", "_vaga")
+    )
 
     if not encoders_path_param or not os.path.exists(encoders_path_param):
         msg = f"Caminho dos encoders inválido ou não encontrado: {encoders_path_param}"
@@ -79,15 +114,22 @@ def preparar_dados_para_payload(prospect_df, vagas_df, encoders_path_param, feat
         return pd.DataFrame(), msg
 
     try:
-        caso_transformado = transform_new_data(caso_merged.copy(), encoders_path=encoders_path_param)
+        caso_transformado = transform_new_data(
+            caso_merged.copy(), encoders_path=encoders_path_param
+        )
         caso_limpo_com_features = clean_features_data(caso_transformado.copy())
 
-
         features_df_payload = caso_limpo_com_features[feature_list_param].fillna(0)
-        logger.info(f"Dados preparados. Features para payload: {features_df_payload.columns.tolist()}")
+        logger.info(
+            f"Dados preparados. Features para payload: {features_df_payload.columns.tolist()}"
+        )
         return features_df_payload, None
     except KeyError as e:
-        disponiveis_str = caso_limpo_com_features.columns.tolist() if 'caso_limpo_com_features' in locals() else 'N/A (erro antes da criação)'
+        disponiveis_str = (
+            caso_limpo_com_features.columns.tolist()
+            if "caso_limpo_com_features" in locals()
+            else "N/A (erro antes da criação)"
+        )
         msg = f"Erro ao selecionar features para o modelo: {e}. Features esperadas: {feature_list_param}. Features disponíveis: {disponiveis_str}"
         logger.error(msg)
         return pd.DataFrame(), msg
@@ -96,23 +138,35 @@ def preparar_dados_para_payload(prospect_df, vagas_df, encoders_path_param, feat
         logger.exception(msg)
         return pd.DataFrame(), msg
 
-def obter_predicao_api(api_url_param, payload_data_list, model_type_param, model_version_str_param):
+
+def obter_predicao_api(
+    api_url_param, payload_data_list, model_type_param, model_version_str_param
+):
     logger.info(f"Enviando requisição para API: {api_url_param}")
     if not payload_data_list or not payload_data_list[0]:
         logger.error("Payload para API está vazio ou inválido.")
-        return {"error": "Payload Inválido", "details": "Não foi possível gerar dados válidos para a API."}, "Payload Inválido"
+        return {
+            "error": "Payload Inválido",
+            "details": "Não foi possível gerar dados válidos para a API.",
+        }, "Payload Inválido"
 
-    payload = json.dumps({
-        "model_name": model_type_param,
-        "model_version": model_version_str_param,
-        "data": payload_data_list
-    })
-    headers = {'Content-Type': 'application/json'}
+    payload = json.dumps(
+        {
+            "model_name": model_type_param,
+            "model_version": model_version_str_param,
+            "data": payload_data_list,
+        }
+    )
+    headers = {"Content-Type": "application/json"}
 
     try:
-        response = requests.post(api_url_param, headers=headers, data=payload, timeout=20)
+        response = requests.post(
+            api_url_param, headers=headers, data=payload, timeout=20
+        )
         response.raise_for_status()
-        logger.info(f"Resposta da API recebida com sucesso. Status: {response.status_code}")
+        logger.info(
+            f"Resposta da API recebida com sucesso. Status: {response.status_code}"
+        )
         return response.json(), None
     except requests.exceptions.Timeout:
         msg = f"Timeout (20s) ao tentar conectar à API em {api_url_param}."
@@ -125,23 +179,32 @@ def obter_predicao_api(api_url_param, payload_data_list, model_type_param, model
     except requests.exceptions.HTTPError as http_err:
         msg = f"Erro HTTP da API: {http_err}. Resposta: {http_err.response.text}"
         logger.error(msg)
-        return {"error": f"Erro HTTP API: {http_err.response.status_code}", "details": http_err.response.text}, msg
+        return {
+            "error": f"Erro HTTP API: {http_err.response.status_code}",
+            "details": http_err.response.text,
+        }, msg
     except requests.exceptions.RequestException as req_err:
         msg = f"Erro na requisição à API: {req_err}"
         logger.error(msg)
         return {"error": "Erro Requisição API", "details": str(req_err)}, msg
     except json.JSONDecodeError:
-        raw_resp_text = response.text if 'response' in locals() else 'N/A (resposta não capturada)'
+        raw_resp_text = (
+            response.text if "response" in locals() else "N/A (resposta não capturada)"
+        )
         msg = "A API retornou uma resposta que não é um JSON válido."
         logger.error(f"{msg} Raw response: {raw_resp_text}")
-        return {"error": "JSON Inválido API", "details": msg, "raw_response": raw_resp_text}, msg
+        return {
+            "error": "JSON Inválido API",
+            "details": msg,
+            "raw_response": raw_resp_text,
+        }, msg
+
 
 def calcular_indice_adequacao(probabilidade_sucesso):
     if probabilidade_sucesso <= 0.2:
         indice = 1 + (probabilidade_sucesso / 0.2) * 1.5
-        return min(max(round(indice, 1), 1.0), 2.5) 
+        return min(max(round(indice, 1), 1.0), 2.5)
     elif probabilidade_sucesso <= 0.40:
-
         indice = 2.6 + ((probabilidade_sucesso - 0.2) / 0.2) * 2.4
         return min(max(round(indice, 1), 2.6), 5.0)
     elif probabilidade_sucesso <= 0.6:
@@ -151,19 +214,24 @@ def calcular_indice_adequacao(probabilidade_sucesso):
         indice = 7.6 + ((probabilidade_sucesso - 0.6) / 0.4) * 2.4
         return min(max(round(indice, 1), 7.6), 10.0)
 
+
 # --- Inicialização da Aplicação Streamlit ---
-dados_carregados, df_prospects, df_vagas, api_url_loaded, encoders_path_loaded = carregar_recursos_aplicacao_hardcoded()
+dados_carregados, df_prospects, df_vagas, api_url_loaded, encoders_path_loaded = (
+    carregar_recursos_aplicacao_hardcoded()
+)
 
 if not dados_carregados:
-    st.error("Falha crítica ao carregar recursos essenciais. A aplicação não pode continuar.")
+    st.error(
+        "Falha crítica ao carregar recursos essenciais. A aplicação não pode continuar."
+    )
     st.stop()
 
-modelo = dados_carregados['model']
-imputer = dados_carregados['imputer']
-scaler = dados_carregados['scaler']
-features = dados_carregados['features']
-model_type_loaded = dados_carregados.get('model_type', 'RandomForest')
-model_version_loaded = str(dados_carregados.get('model_version', 1))
+modelo = dados_carregados["model"]
+imputer = dados_carregados["imputer"]
+scaler = dados_carregados["scaler"]
+features = dados_carregados["features"]
+model_type_loaded = dados_carregados.get("model_type", "RandomForest")
+model_version_loaded = str(dados_carregados.get("model_version", 1))
 
 # --- Interface Principal ---
 st.title("🚀 Previsão de Sucesso de Candidatos")
@@ -189,31 +257,42 @@ Este sistema utiliza um modelo **{model_type_loaded}** para prever o sucesso.
 st.sidebar.markdown("---")
 
 # --- Gerenciamento de Estado da Sessão ---
-if 'prospect_selecionado' not in st.session_state:
+if "prospect_selecionado" not in st.session_state:
     st.session_state.prospect_selecionado = None
-if 'caso_processado' not in st.session_state:
+if "caso_processado" not in st.session_state:
     st.session_state.caso_processado = None
-if 'resultado_previsao' not in st.session_state:
+if "resultado_previsao" not in st.session_state:
     st.session_state.resultado_previsao = None
 
 # --- Interação Principal ---
 st.header("🔮 Teste de Previsão")
 
-if st.button('👤 Carregar Prospect Aleatório e Prever', type="primary", help="Clique para selecionar um candidato e obter a previsão."):
+if st.button(
+    "👤 Carregar Prospect Aleatório e Prever",
+    type="primary",
+    help="Clique para selecionar um candidato e obter a previsão.",
+):
     st.session_state.prospect_selecionado = None
     st.session_state.caso_processado = None
     st.session_state.resultado_previsao = None
 
     if df_prospects is None or df_prospects.empty:
-        st.error("Não há dados de prospects carregados. Verifique os caminhos hardcoded e os arquivos de dados.")
+        st.error(
+            "Não há dados de prospects carregados. Verifique os caminhos hardcoded e os arquivos de dados."
+        )
         st.stop()
 
-    with st.spinner('Selecionando prospect e preparando dados...'):
+    with st.spinner("Selecionando prospect e preparando dados..."):
         um_prospect_aleatorio_df = df_prospects.sample(1)
         st.session_state.prospect_selecionado = um_prospect_aleatorio_df
 
         features_df_payload, erro_preparacao = preparar_dados_para_payload(
-            um_prospect_aleatorio_df, df_vagas, encoders_path_loaded, features, imputer, scaler
+            um_prospect_aleatorio_df,
+            df_vagas,
+            encoders_path_loaded,
+            features,
+            imputer,
+            scaler,
         )
 
         if erro_preparacao:
@@ -223,18 +302,28 @@ if st.button('👤 Carregar Prospect Aleatório e Prever', type="primary", help=
         else:
             st.session_state.caso_processado = features_df_payload
 
-    if st.session_state.caso_processado is not None and not st.session_state.caso_processado.empty:
-        with st.spinner('Enviando dados para a API e aguardando previsão... ⏳'):
+    if (
+        st.session_state.caso_processado is not None
+        and not st.session_state.caso_processado.empty
+    ):
+        with st.spinner("Enviando dados para a API e aguardando previsão... ⏳"):
             payload_list = st.session_state.caso_processado.values.tolist()
 
             resultado_api, erro_api = obter_predicao_api(
                 api_url_loaded, payload_list, model_type_loaded, model_version_loaded
             )
             st.session_state.resultado_previsao = resultado_api
-            if erro_api and isinstance(resultado_api, dict) and "error" in resultado_api: # erro já formatado
+            if (
+                erro_api
+                and isinstance(resultado_api, dict)
+                and "error" in resultado_api
+            ):  # erro já formatado
                 pass
-            elif erro_api: 
-                st.session_state.resultado_previsao = {"error": "Erro API Genérico", "details": erro_api}
+            elif erro_api:
+                st.session_state.resultado_previsao = {
+                    "error": "Erro API Genérico",
+                    "details": erro_api,
+                }
                 logger.error(f"Erro genérico da API (UI): {erro_api}")
 
 # --- Exibição dos Resultados ---
@@ -248,12 +337,20 @@ if st.session_state.prospect_selecionado is not None:
         st.write("**Prospect Original Selecionado:**")
         st.dataframe(st.session_state.prospect_selecionado)
 
-        if st.session_state.caso_processado is not None and not st.session_state.caso_processado.empty:
+        if (
+            st.session_state.caso_processado is not None
+            and not st.session_state.caso_processado.empty
+        ):
             with st.expander("Ver Features Enviadas ao Modelo"):
                 st.write("**Features Processadas e Enviadas:**")
                 st.dataframe(st.session_state.caso_processado)
-        elif st.session_state.caso_processado is not None and st.session_state.caso_processado.empty:
-            st.warning("Não foi possível processar as features para este prospect devido a um erro anterior.")
+        elif (
+            st.session_state.caso_processado is not None
+            and st.session_state.caso_processado.empty
+        ):
+            st.warning(
+                "Não foi possível processar as features para este prospect devido a um erro anterior."
+            )
 
     with col2:
         st.write("**Resultados:**")
@@ -261,34 +358,57 @@ if st.session_state.prospect_selecionado is not None:
 
         if resultado:
             if isinstance(resultado, dict) and "error" in resultado:
-                error_msg = resultado.get('details', resultado['error'])
+                error_msg = resultado.get("details", resultado["error"])
                 st.error(f"Falha na obtenção da previsão: {error_msg}")
                 logger.warning(f"Exibindo erro da API para o usuário (UI): {error_msg}")
                 if "raw_response" in resultado:
-                    st.text_area("Resposta Bruta da API (debug):", resultado["raw_response"], height=100)
-                elif isinstance(resultado.get("details"), str) and resultado["details"].strip().startswith("{"):
-                     try: st.json(json.loads(resultado["details"]))
-                     except: pass
+                    st.text_area(
+                        "Resposta Bruta da API (debug):",
+                        resultado["raw_response"],
+                        height=100,
+                    )
+                elif isinstance(resultado.get("details"), str) and resultado[
+                    "details"
+                ].strip().startswith("{"):
+                    try:
+                        st.json(json.loads(resultado["details"]))
+                    except:
+                        pass
             else:
                 actual_predictions_data = None
-                if isinstance(resultado, dict) and 'predictions' in resultado:
-                    actual_predictions_data = resultado['predictions']
-                elif isinstance(resultado, list) and len(resultado) > 0 and isinstance(resultado[0], list):
+                if isinstance(resultado, dict) and "predictions" in resultado:
+                    actual_predictions_data = resultado["predictions"]
+                elif (
+                    isinstance(resultado, list)
+                    and len(resultado) > 0
+                    and isinstance(resultado[0], list)
+                ):
                     actual_predictions_data = resultado
 
-                if actual_predictions_data and isinstance(actual_predictions_data, list) and actual_predictions_data:
+                if (
+                    actual_predictions_data
+                    and isinstance(actual_predictions_data, list)
+                    and actual_predictions_data
+                ):
                     first_sample_prediction_list = actual_predictions_data[0]
 
-                    if isinstance(first_sample_prediction_list, list) and len(first_sample_prediction_list) >= 2:
+                    if (
+                        isinstance(first_sample_prediction_list, list)
+                        and len(first_sample_prediction_list) >= 2
+                    ):
                         probabilidade_sucesso = float(first_sample_prediction_list[1])
-                        logger.info(f"Probabilidade de sucesso extraída: {probabilidade_sucesso}")
+                        logger.info(
+                            f"Probabilidade de sucesso extraída: {probabilidade_sucesso}"
+                        )
 
                         status_candidato = ""
                         recomendacao_msg = ""
 
                         if probabilidade_sucesso <= 0.25:
                             status_candidato = "Performance Baixa"
-                            recomendacao_msg = "Enviar feedback para melhorar preenchimento do perfil."
+                            recomendacao_msg = (
+                                "Enviar feedback para melhorar preenchimento do perfil."
+                            )
                             st.error(recomendacao_msg)
                         elif probabilidade_sucesso <= 0.40:
                             status_candidato = "Performance Moderada"
@@ -303,11 +423,16 @@ if st.session_state.prospect_selecionado is not None:
                             recomendacao_msg = "Candidato com performance alta! Forte recomendação para prosseguir."
                             st.success(recomendacao_msg)
 
-                        indice_adequacao_candidato = calcular_indice_adequacao(probabilidade_sucesso)
-                    
-                        st.metric(label="Previsão de Sucesso (Modelo)",
-                                  value=f"{probabilidade_sucesso:.2%}",
-                                  delta=status_candidato, delta_color='off')
+                        indice_adequacao_candidato = calcular_indice_adequacao(
+                            probabilidade_sucesso
+                        )
+
+                        st.metric(
+                            label="Previsão de Sucesso (Modelo)",
+                            value=f"{probabilidade_sucesso:.2%}",
+                            delta=status_candidato,
+                            delta_color="off",
+                        )
                         if indice_adequacao_candidato >= 8:
                             st.markdown("⭐⭐⭐ Excelente Fit!")
                         elif indice_adequacao_candidato >= 6:
@@ -319,22 +444,32 @@ if st.session_state.prospect_selecionado is not None:
 
                         with st.expander("Ver Dados da Previsão da API"):
                             st.json(actual_predictions_data)
-                        if isinstance(resultado, dict) and 'predictions' in resultado:
-                             with st.expander("Ver Resposta Completa Original da API"):
+                        if isinstance(resultado, dict) and "predictions" in resultado:
+                            with st.expander("Ver Resposta Completa Original da API"):
                                 st.json(resultado)
                     else:
                         st.error("Formato da lista de predição interna inesperado.")
                         st.json(resultado)
-                        logger.error(f"Formato inesperado para first_sample_prediction_list (UI): {first_sample_prediction_list}")
+                        logger.error(
+                            f"Formato inesperado para first_sample_prediction_list (UI): {first_sample_prediction_list}"
+                        )
                 else:
-                    st.error("A resposta da API não continha dados de predição válidos no formato esperado.")
+                    st.error(
+                        "A resposta da API não continha dados de predição válidos no formato esperado."
+                    )
                     st.json(resultado)
-                    logger.error(f"actual_predictions_data não é válido ou está vazio (UI): {actual_predictions_data}")
+                    logger.error(
+                        f"actual_predictions_data não é válido ou está vazio (UI): {actual_predictions_data}"
+                    )
         else:
-            st.info("Clique no botão 'Carregar Prospect Aleatório e Prever' para ver a análise.")
+            st.info(
+                "Clique no botão 'Carregar Prospect Aleatório e Prever' para ver a análise."
+            )
 else:
     if not dados_carregados:
-        st.warning("Recursos da aplicação não puderam ser carregados. Verifique os logs e os caminhos no código.")
+        st.warning(
+            "Recursos da aplicação não puderam ser carregados. Verifique os logs e os caminhos no código."
+        )
     else:
         st.info("Aguardando a seleção de um prospect para iniciar a análise.")
 
