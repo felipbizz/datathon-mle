@@ -5,6 +5,8 @@ data/
 *.html
 _old_*
 
+**/logs/
+
 # MLFlow Runs
 infra/volumes/mlflow/
 

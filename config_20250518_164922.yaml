@@ -1,0 +1,43 @@
+model:
+  colsample_bytree: 0.8
+  learning_rate: 0.1
+  lr_max_iter: 1000
+  max_depth: 5
+  n_estimators: 100
+  random_state: 42
+  subsample: 0.8
+  test_size: 0.2
+  tuned_params:
+    LogisticRegression:
+      C: 0.001
+      penalty: l2
+      solver: liblinear
+    RandomForest:
+      max_depth: 30
+      min_samples_leaf: 1
+      min_samples_split: 10
+      n_estimators: 100
+    XGBoost:
+      colsample_bytree: 0.9
+      learning_rate: 0.1
+      max_depth: 7
+      n_estimators: 200
+      subsample: 0.8
+paths:
+  applicants_bronze: /home/thales/postech/phase5/datathon-mle/Datathon Decision/2_bronze/applicants.parquet
+  applicants_json: /home/thales/postech/phase5/datathon-mle/Datathon Decision/1_raw/applicants.json
+  applicants_silver: /home/thales/postech/phase5/datathon-mle/Datathon Decision/3_silver/applicants.parquet
+  dataset_consolidado: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/dataset_consolidado.parquet
+  dataset_features: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/dataset_features.parquet
+  dataset_modelagem: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/dataset_modelagem.parquet
+  feature_importance_lgm: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/feature_importance_lgb.csv
+  feature_importance_lr: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/feature_importance_lr.csv
+  feature_importance_rf: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/feature_importance_rf.csv
+  feature_importance_xgb: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/feature_importance_xgb.csv
+  modelo_treinado: /home/thales/postech/phase5/datathon-mle/Datathon Decision/4_gold/modelo_treinado.pkl
+  prospects_bronze: /home/thales/postech/phase5/datathon-mle/Datathon Decision/2_bronze/prospects.parquet
+  prospects_json: /home/thales/postech/phase5/datathon-mle/Datathon Decision/1_raw/prospects.json
+  prospects_silver: /home/thales/postech/phase5/datathon-mle/Datathon Decision/3_silver/prospects.parquet
+  vagas_bronze: /home/thales/postech/phase5/datathon-mle/Datathon Decision/2_bronze/vagas.parquet
+  vagas_json: /home/thales/postech/phase5/datathon-mle/Datathon Decision/1_raw/vagas.json
+  vagas_silver: /home/thales/postech/phase5/datathon-mle/Datathon Decision/3_silver/vagas.parquet

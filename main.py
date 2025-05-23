@@ -1,63 +1,68 @@
 import argparse
-import subprocess
-from src.log_config import logging
+import os
+from mle_datathon.utils import set_log
+from mle_datathon.model import train, tune, ModelRegistry
+from mle_datathon.data_processing import execute_preprocess, feature_engineering
+
+
 import mlflow
 
+tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
 
-def preprocess():
-    logging.info('Iniciando preprocess')
-    subprocess.run(["python", "src/preprocess_data.py"], check=True)
-    logging.info('Finalizou preprocess')
+logger = set_log("main")
+mr = ModelRegistry(tracking_uri)
 
-def consolidate():
-    logging.info('Iniciando consolidar_dados')
-    subprocess.run(["python", "src/consolidar_dados.py"], check=True)
-    logging.info('Finalizou consolidar_dados')
 
-def define_target():
-    logging.info('Iniciando definir_target')
-    subprocess.run(["python", "src/definir_target.py"], check=True)
-    logging.info('Finalizou definir_target')
+def list_registered_models():
+    logger.info(f"Modelos Registrados:\n{mr.list_registered_models()}")
 
-def feature_engineering():
-    logging.info('Iniciando feature_engineering')
-    subprocess.run(["python", "src/feature_engineering.py"], check=True)
-    logging.info('Finalizou feature_engineering')
 
-def train_model():
-    logging.info('Iniciando train_model')
-    subprocess.run(["python", "src/train_model.py"], check=True)
-    logging.info('Finalizou train_model')
+def purge_registered_models():
+    mr.purge_registered_models()
+    logger.info("Modelos registrados removidos com sucesso!")
 
-def tune_model():
-    logging.info('Iniciando tune_model')
-    subprocess.run(["python", "src/tune_model.py"], check=True)
-    logging.info('Finalizou tune_model')
+
+def run_steps(steps):
+    """
+    Executa os passos especificados no pipeline.
+    """
+
+    if "full_pipeline" in steps:
+        logger.info("Iniciando pipeline completo")
+        execute_preprocess()
+        feature_engineering()
+        train()
+        return
+
+    if "preprocess" in steps:
+        logger.info("Iniciando preprocessamento")
+        execute_preprocess()
+    if "feature_engineering" in steps:
+        logger.info("Iniciando engenharia de features")
+        feature_engineering()
+    if "train_model" in steps:
+        logger.info("Iniciando treinamento do modelo")
+        train()
+    if "tune" in steps:
+        logger.info("Iniciando ajuste do modelo")
+        tune()
+    if "list_registered_models" in steps:
+        list_registered_models()
 
 
 def main(steps):
-
     # Set up MLflow tracking URI
-    mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    mlflow.set_tracking_uri(tracking_uri)
 
+    experiment_name = f"experiment_{steps[0]}"
+    logger.info(f"Iniciando experimento: {experiment_name}")
 
     # Set up MLflow experiment
-    mlflow.set_experiment(f"experiment_{steps[0]}") #_{current_datetime}")
+    mlflow.set_experiment(experiment_name)
     # Enable system metrics logging
     mlflow.enable_system_metrics_logging()
 
-    if "preprocess" in steps:
-        preprocess()
-    if "consolidate" in steps:
-        consolidate()
-    if "define_target" in steps:
-        define_target()
-    if "feature_engineering" in steps:
-        feature_engineering()
-    if "train_model" in steps:
-        train_model()
-    if "tune" in steps:
-        tune_model()
+    run_steps(steps)
 
 
 if __name__ == "__main__":
@@ -66,11 +71,7 @@ if __name__ == "__main__":
         "--steps",
         nargs="+",
         default=[
-            "preprocess",
-            "consolidate",
-            "define_target",
-            "feature_engineering",
-            "train_model",
+            "full_pipeline",
         ],
     )
     args = parser.parse_args()
